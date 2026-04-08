@@ -1,0 +1,108 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}{% if is_update %}Update{% else %}Create{% endif %} Timetable Entry{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>{% if is_update %}Update{% else %}Add{% endif %} Timetable Entry</h2>
+    <a href="{% url 'core:manage_timetable' %}" class="btn" style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Timetable
+    </a>
+</div>
+
+<div class="card" style="max-width: 700px;">
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="form-group">
+                <label for="course">Course *</label>
+                <select id="course" name="course_name" class="form-control" required>
+                    <option value="">-- Select Course --</option>
+                    {% for course in courses %}
+                    <option value="{{ course }}" {% if timetable.course_name == course %}selected{% endif %}>{{ course }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Subject Name *</label>
+                <input type="text" id="subject" name="subject_name" class="form-control" placeholder="e.g., C Programming" required value="{% if timetable %}{{ timetable.subject_name }}{% endif %}">
+            </div>
+
+            <div class="form-group">
+                <label for="day">Day of Week *</label>
+                <select id="day" name="day" class="form-control" required>
+                    <option value="">-- Select Day --</option>
+                    {% for day in days %}
+                    <option value="{{ day }}" {% if timetable.day == day %}selected{% endif %}>{{ day }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="start_time">Start Time *</label>
+                <input type="time" id="start_time" name="start_time" class="form-control" required value="{% if timetable %}{{ timetable.start_time|time:'H:i' }}{% endif %}">
+            </div>
+
+            <div class="form-group">
+                <label for="end_time">End Time *</label>
+                <input type="time" id="end_time" name="end_time" class="form-control" required value="{% if timetable %}{{ timetable.end_time|time:'H:i' }}{% endif %}">
+            </div>
+
+            <div class="form-group">
+                <label for="duration">Duration (e.g., 2 Hours)</label>
+                <input type="text" id="duration" name="duration" class="form-control" placeholder="2 Hours" value="{% if timetable %}{{ timetable.duration }}{% endif %}">
+            </div>
+
+            <div class="form-group">
+                <label for="faculty">Faculty Name *</label>
+                <input type="text" id="faculty" name="faculty_name" class="form-control" placeholder="e.g., Dr. John Doe" required value="{% if timetable %}{{ timetable.faculty_name }}{% endif %}">
+            </div>
+
+            <div class="form-group">
+                <label for="room">Room Number/Hall *</label>
+                <input type="text" id="room" name="room_number" class="form-control" placeholder="e.g., Hall 101" required value="{% if timetable %}{{ timetable.room_number }}{% endif %}">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 30px;">
+            <button type="submit" class="btn" style="background: #4F46E5; flex: 1;">
+                <i class="fas fa-save"></i> {% if is_update %}Update{% else %}Create{% endif %} Timetable Entry
+            </button>
+            <a href="{% url 'core:manage_timetable' %}" class="btn" style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB; flex: 1; text-align: center;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-family: inherit;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4F46E5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+</style>
+{% endblock %}

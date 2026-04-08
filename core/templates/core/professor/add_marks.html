@@ -1,0 +1,80 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Add Marks - {{ exam.title }}{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+    <div>
+        <h2 class="page-title" style="margin-bottom: 5px;">Manage Marks: {{ exam.title }}</h2>
+        <p style="color: var(--text-light);"><i class="fas fa-book"></i> {{ exam.subject.name }} | <i
+                class="fas fa-calendar-day"></i> {{ exam.date|date:"F d, Y" }}</p>
+    </div>
+    <a href="{% url 'core:professor_results_list' %}" class="btn"
+        style="background: #E5E7EB; color: var(--text-main); text-decoration: none;">
+        <i class="fas fa-arrow-left"></i> Back to Exams
+    </a>
+</div>
+
+<div class="card" style="padding: 20px;">
+    {% if students %}
+    <form method="POST">
+        {% csrf_token %}
+        <div style="overflow-x: auto; margin-bottom: 20px;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB;">
+                        <th style="padding: 12px; text-align: left; color: var(--text-main);">Roll Number</th>
+                        <th style="padding: 12px; text-align: left; color: var(--text-main);">Student Name</th>
+                        <th style="padding: 12px; text-align: center; color: var(--text-main);">Marks Obtained</th>
+                        <th style="padding: 12px; text-align: left; color: var(--text-main);">Remarks (Optional)</th>
+                        <th style="padding: 12px; text-align: center; color: var(--text-main);">Current Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr style="border-bottom: 1px solid #F3F4F6;">
+                        <td style="padding: 12px; font-weight: 500; font-family: monospace;">{{ student.roll_number }}
+                        </td>
+                        <td style="padding: 12px; color: var(--text-main);">{{ student.user.get_full_name }}</td>
+                        <td style="padding: 12px; text-align: center;">
+                            <input type="number" step="0.5" name="marks_{{ student.id }}" {% for sid, result in existing_results.items %} {% if sid == student.id %}value="{{ result.marks_obtained }}" {% endif %} {% endfor %}
+                                style="width: 80px; padding: 8px; border: 1px solid #D1D5DB; border-radius: 4px; text-align: center;"
+                                required>
+                        </td>
+                        <td style="padding: 12px;">
+                            <input type="text" name="remarks_{{ student.id }}" {% for sid, result in existing_results.items %} {% if sid == student.id %}value="{{ result.remarks }}" {% endif %} {% endfor %}
+                                style="width: 100%; padding: 8px; border: 1px solid #D1D5DB; border-radius: 4px;"
+                                placeholder="Good...">
+                        </td>
+                        <td style="padding: 12px; text-align: center;">
+                            {% for sid, result in existing_results.items %}
+                            {% if sid == student.id %}
+                            <span
+                                style="background: #E0E7FF; color: #4338CA; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.9rem;">
+                                {{ result.grade }}
+                            </span>
+                            {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: right;">
+            <button type="submit" class="btn"
+                style="background: #10B981; padding: 12px 25px; font-size: 1.1rem; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);">
+                <i class="fas fa-save"></i> Save All Marks
+            </button>
+        </div>
+    </form>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: var(--text-light);">
+        <i class="fas fa-users-slash" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+        <h3>No Students Enrolled</h3>
+        <p>There are no students currently enrolled in the subject assigned to this exam.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

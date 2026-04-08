@@ -1,0 +1,145 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Exam Timetable | CodeCraft College{% endblock %}
+
+{% block content %}
+<style>
+    .exam-hero {
+        background: linear-gradient(135deg, #111827 0%, #312e81 100%);
+        padding: 60px 0 50px;
+        color: white;
+        text-align: center;
+        border-radius: 0 0 30px 30px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    .exam-hero::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: url('https://www.transparenttextures.com/patterns/cubes.png');
+        opacity: 0.05;
+    }
+
+    .exam-table-container {
+        background: white;
+        border-radius: 20px;
+        border: 1px solid #e5e7eb;
+        box-shadow: 0 10px 30px -5px rgba(0,0,0,0.05);
+        overflow: hidden;
+    }
+
+    .exam-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .exam-table th {
+        background: #f8fafc;
+        padding: 18px 25px;
+        font-weight: 700;
+        color: #334155;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .exam-table td {
+        padding: 18px 25px;
+        vertical-align: middle;
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.2s ease;
+    }
+
+    .exam-row:hover {
+        background-color: #f8fafc;
+        transform: scale(1.01);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .course-badge {
+        background: #e0e7ff;
+        color: #4338ca;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        display: inline-block;
+    }
+
+    .exam-type-badge {
+        background: #fee2e2;
+        color: #b91c1c;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+</style>
+
+<div class="exam-hero">
+    <h1 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 10px; position: relative; z-index: 1;">Time Table</h1>
+</div>
+
+<div class="exam-table-container">
+    {% if exams %}
+    <div class="table-responsive">
+        <table class="exam-table">
+            <thead>
+                <tr>
+                    <th>Date & Time</th>
+                    <th>Course & Type</th>
+                    <th>Subject Name</th>
+                    <th>Duration</th>
+                    <th>Room</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exam in exams %}
+                <tr class="exam-row">
+                    <td>
+                        <strong style="color: #1e293b; display: block; font-size: 1.05rem;">
+                            <i class="far fa-calendar-alt" style="color: var(--secondary); margin-right: 5px;"></i>
+                            {{ exam.date|date:"F d, Y" }}
+                        </strong>
+                        <span style="color: #64748b; font-size: 0.95rem; font-weight: 500; display: block; margin-top: 4px;">
+                            <i class="far fa-clock"></i> {{ exam.start_time|time:"h:i A" }} - {{ exam.end_time|time:"h:i A" }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="course-badge" style="margin-bottom: 5px;">{{ exam.subject.semester.course.code }} ({{ exam.semester.name }})</div><br>
+                        <div class="exam-type-badge">{{ exam.exam_type.name }}</div>
+                    </td>
+                    <td>
+                        <strong style="color: #0f172a; font-size: 1.1rem; font-weight: 600;">{{ exam.subject.name }}</strong>
+                    </td>
+                    <td>
+                        <span style="color: #475569; font-weight: 500;">
+                            <i class="fas fa-hourglass-half" style="color: #fb923c; margin-right: 5px;"></i>
+                            {{ exam.duration_hours }}
+                        </span>
+                    </td>
+                    <td>
+                        <span style="background: #f1f5f9; color: #334155; padding: 8px 15px; border-radius: 8px; font-weight: 600;">
+                            <i class="fas fa-door-open" style="margin-right: 5px;"></i> {{ exam.room }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="padding: 60px 20px; text-align: center;">
+        <i class="fas fa-calendar-times" style="font-size: 4rem; color: #e2e8f0; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 1.5rem; color: #1e293b; font-weight: 700; margin-bottom: 10px;">No Exams Scheduled</h3>
+        <p style="color: #64748b; font-size: 1.1rem;">The examination schedule has not been published yet. Please check back later.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

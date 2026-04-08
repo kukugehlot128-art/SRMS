@@ -1,0 +1,151 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Broadcast Notifications{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>System Announcements</h2>
+    <button onclick="document.getElementById('addModal').style.display='flex'" class="btn" style="background: #F59E0B;">
+        <i class="fas fa-paper-plane"></i> Send Alert
+    </button>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th style="width: 50px;">Type</th>
+                <th>Notification Title</th>
+                <th>Target Audience</th>
+                <th>Broadcast Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notif in notifications %}
+            <tr>
+                <td style="text-align: center;">
+                    <div style="width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; background: 
+                        {% if notif.notif_type == 'exam' %}rgba(236, 72, 153, 0.1); color: #EC4899;
+                        {% elif notif.notif_type == 'result' %}rgba(16, 185, 129, 0.1); color: #10B981;
+                        {% elif notif.notif_type == 'assignment' %}rgba(245, 158, 11, 0.1); color: #F59E0B;
+                        {% else %}rgba(79, 70, 229, 0.1); color: var(--secondary);{% endif %}">
+
+                        {% if notif.notif_type == 'exam' %}<i class="fas fa-file-alt"></i>
+                        {% elif notif.notif_type == 'result' %}<i class="fas fa-trophy"></i>
+                        {% elif notif.notif_type == 'assignment' %}<i class="fas fa-tasks"></i>
+                        {% else %}<i class="fas fa-bell"></i>{% endif %}
+                    </div>
+                </td>
+                <td>
+                    <div style="font-weight: 500; color: var(--text-main); margin-bottom: 3px;">{{ notif.title }}</div>
+                    <div
+                        style="font-size: 0.85rem; color: var(--text-light); max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        {{ notif.message }}</div>
+                </td>
+                <td>
+                    {% if notif.target_role == 'all' %}
+                    <span
+                        style="background: #D1FAE5; color: #065F46; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-globe"></i> Everyone</span>
+                    {% elif notif.target_role == 'student' %}
+                    <span
+                        style="background: rgba(79, 70, 229, 0.1); color: var(--secondary); padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-user-graduate"></i> Students Only</span>
+                    {% elif notif.target_role == 'professor' %}
+                    <span
+                        style="background: rgba(236, 72, 153, 0.1); color: #EC4899; padding: 3px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-chalkboard-teacher"></i> Faculty Only</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-light); font-size: 0.9rem;">
+                    {{ notif.created_at|date:"M d, Y h:i A" }}<br>
+                    <span style="font-size: 0.8rem;">by {{ notif.created_by.username }}</span>
+                </td>
+                <td>
+                    {% if notif.is_active %}
+                    <span style="color: #10B981; font-weight: 600; font-size: 0.9rem;"><i class="fas fa-circle"
+                            style="font-size: 0.6rem; margin-right: 5px;"></i> Active</span>
+                    {% else %}
+                    <span style="color: var(--text-light); font-weight: 600; font-size: 0.9rem;"><i
+                            class="fas fa-circle" style="font-size: 0.6rem; margin-right: 5px;"></i> Archived</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'core:update_notification' notif.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #4F46E5; color: white;"><i
+                                class="fas fa-edit"></i></a>
+                        <a href="{% url 'core:delete_notification' notif.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i
+                                class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="far fa-bell-slash" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    No announcements have been broadcasted yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Send Notification Modal -->
+<div id="addModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 550px; padding: 30px;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
+            <h3 style="color: var(--text-main);">Broadcast Announcement</h3>
+            <button type="button" onclick="document.getElementById('addModal').style.display='none'"
+                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Headline (Title)</label>
+                <input type="text" name="title" class="form-control" required
+                    placeholder="e.g. Midterm Results Declared">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Category</label>
+                    <select name="notif_type" class="form-control" required>
+                        <option value="general">📢 General Info</option>
+                        <option value="exam">📝 Exam Update</option>
+                        <option value="result">🏆 Result Declaration</option>
+                        <option value="assignment">📋 Assignment Alert</option>
+                        <option value="event">🎉 Campus Event</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Target Audience</label>
+                    <select name="target_role" class="form-control" required>
+                        <option value="all">Everyone</option>
+                        <option value="student">Students Only</option>
+                        <option value="professor">Professors / Faculty Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Message Content</label>
+                <textarea name="message" class="form-control" rows="5" required
+                    placeholder="Type your full announcement here. It will be immediately visible on user dashboards."></textarea>
+            </div>
+
+            <button type="submit" class="btn"
+                style="width: 100%; justify-content: center; margin-top: 15px; background: #F59E0B;">
+                <i class="fas fa-paper-plane"></i> Send Now
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Manage Assignments{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Assignment Management</h2>
+    <a href="{% url 'core:create_assignment' %}" class="btn">
+        <i class="fas fa-plus"></i> Create Assignment
+    </a>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Subject</th>
+                <th>Due Date</th>
+                <th>Max Marks</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for assignment in assignments %}
+            <tr>
+                <td>
+                    <div style="font-weight: 500; color: var(--text-main);">{{ assignment.title }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px;">
+                        Created: {{ assignment.created_at|date:"M d, Y" }}
+                    </div>
+                </td>
+                <td>
+                    <span
+                        style="background: rgba(37, 99, 235, 0.1); color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">{{
+                        assignment.subject.code }}</span>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px;">{{
+                        assignment.subject.name|truncatechars:20 }}</div>
+                </td>
+                <td
+                    style="color: {% if assignment.due_date < today %}#EF4444{% else %}var(--text-main){% endif %}; font-weight: 500;">
+                    {{ assignment.due_date|date:"M d, Y" }}
+                    {% if assignment.due_date < today %} <br><span style="font-size: 0.75rem; color: #EF4444;"><i
+                                class="fas fa-exclamation-circle"></i> Past Due</span>
+                        {% endif %}
+                </td>
+                <td style="font-weight: 600;">{{ assignment.max_marks }}</td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'core:update_assignment' assignment.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #4F46E5; color: white;"><i
+                                class="fas fa-edit"></i></a>
+                        <a href="{% url 'core:delete_assignment' assignment.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i
+                                class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-tasks" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    No assignments found in the system.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

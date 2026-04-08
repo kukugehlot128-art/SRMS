@@ -1,0 +1,82 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Dashboard Overview</h2>
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+    <div class="card" style="display: flex; align-items: center; gap: 20px;">
+        <div
+            style="background: rgba(236, 72, 153, 0.1); color: var(--primary); width: 60px; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+            <i class="fas fa-book"></i>
+        </div>
+        <div>
+            <h4 style="color: var(--text-light); font-weight: 500;">Teaching Subjects</h4>
+            <h2 style="color: var(--text-main); font-size: 1.8rem;">{{ subjects.count }}</h2>
+        </div>
+    </div>
+
+    <div class="card" style="display: flex; align-items: center; gap: 20px;">
+        <div
+            style="background: rgba(139, 92, 246, 0.1); color: var(--secondary); width: 60px; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+            <i class="fas fa-users"></i>
+        </div>
+        <div>
+            <h4 style="color: var(--text-light); font-weight: 500;">Total Students</h4>
+            <h2 style="color: var(--text-main); font-size: 1.8rem;">{{ total_students }}</h2>
+        </div>
+    </div>
+
+    <div class="card" style="display: flex; align-items: center; gap: 20px;">
+        <div
+            style="background: rgba(16, 185, 129, 0.1); color: #10B981; width: 60px; height: 60px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem;">
+            <i class="fas fa-tasks"></i>
+        </div>
+        <div>
+            <h4 style="color: var(--text-light); font-weight: 500;">Assignments Posted</h4>
+            <h2 style="color: var(--text-main); font-size: 1.8rem;">{{ assignments.count }}</h2>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+    <div class="card">
+        <h3 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #E5E7EB;">Recent Assignments</h3>
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="color: var(--text-light); border-bottom: 2px solid #E5E7EB;">
+                    <th style="padding: 10px 0;">Title</th>
+                    <th style="padding: 10px 0;">Subject</th>
+                    <th style="padding: 10px 0;">Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for assign in assignments %}
+                <tr style="border-bottom: 1px solid #F3F4F6;">
+                    <td style="padding: 12px 0; font-weight: 500;">{{ assign.title }}</td>
+                    <td style="padding: 12px 0; color: var(--text-light);">{{ assign.subject.code }}</td>
+                    <td style="padding: 12px 0; color: #EF4444;">{{ assign.due_date|date:"M d, Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" style="padding: 15px 0;">No assignments posted yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #E5E7EB;">Quick Actions</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="{% url 'core:professor_attendance' %}"
+                style="background: var(--primary); color: white; padding: 12px; border-radius: 8px; text-decoration: none; text-align: center; transition: opacity 0.3s;"><i
+                    class="fas fa-plus-circle"></i> Mark Attendance</a>
+            <a href="{% url 'core:professor_assignments' %}"
+                style="background: var(--secondary); color: white; padding: 12px; border-radius: 8px; text-decoration: none; text-align: center; transition: opacity 0.3s;"><i
+                    class="fas fa-upload"></i> Create Assignment</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

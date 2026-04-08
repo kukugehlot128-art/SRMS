@@ -1,0 +1,76 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Manage Streams{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Stream Management</h2>
+    <button onclick="document.getElementById('addModal').style.display='flex'" class="btn" style="background: var(--primary); color: white;">
+        <i class="fas fa-plus"></i> Add Stream
+    </button>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Stream Name</th>
+                <th>Course</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stream in streams %}
+            <tr>
+                <td>
+                    <div style="font-weight: 500; color: var(--text-main);">{{ stream.name }}</div>
+                </td>
+                <td style="color: var(--text-light);">{{ stream.course.name }} ({{ stream.course.code }})</td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'core:update_stream' stream.id %}" class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: #4F46E5; color: white;"><i class="fas fa-edit"></i></a>
+                        <a href="{% url 'core:delete_stream' stream.id %}" class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" style="text-align: center; padding: 30px; color: var(--text-light);">No streams found. Add a stream to get started.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Add Stream Modal -->
+<div id="addModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 500px; padding: 30px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
+            <h3 style="color: var(--text-main);">Create New Stream</h3>
+            <button type="button" onclick="document.getElementById('addModal').style.display='none'" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+        </div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Stream Name</label>
+                <input type="text" name="name" class="form-control" required placeholder="e.g. BCA 1st">
+            </div>
+            
+            <div class="form-group">
+                <label>Parent Course</label>
+                <select name="course_id" class="form-control" required>
+                    <option value="">-- Select Course --</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.name }} ({{ course.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 15px;">
+                Save Stream
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

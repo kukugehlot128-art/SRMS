@@ -1,0 +1,44 @@
+{% extends 'core/student/base.html' %}
+
+{% block title %}Notifications{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Notifications & Alerts</h2>
+
+<div class="card">
+    {% for notif in notifications %}
+    <div style="padding: 15px; border-bottom: 1px solid #E5E7EB; display: flex; gap: 15px; align-items: flex-start;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: 
+            {% if notif.notif_type == 'exam' %}rgba(236, 72, 153, 0.1); color: var(--secondary);
+            {% elif notif.notif_type == 'result' %}rgba(16, 185, 129, 0.1); color: #10B981;
+            {% elif notif.notif_type == 'assignment' %}rgba(245, 158, 11, 0.1); color: #F59E0B;
+            {% else %}rgba(79, 70, 229, 0.1); color: var(--primary);{% endif %}">
+
+            {% if notif.notif_type == 'exam' %}<i class="fas fa-file-alt"></i>
+            {% elif notif.notif_type == 'result' %}<i class="fas fa-trophy"></i>
+            {% elif notif.notif_type == 'assignment' %}<i class="fas fa-tasks"></i>
+            {% else %}<i class="fas fa-bell"></i>{% endif %}
+        </div>
+
+        <div style="flex: 1;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h4 style="color: var(--text-main); font-weight: 600;">{{ notif.title }}</h4>
+                <span style="font-size: 0.8rem; color: var(--text-light);">{{ notif.created_at|date:"M d, P" }}</span>
+            </div>
+            <p style="color: var(--text-light); font-size: 0.95rem; line-height: 1.5;">{{ notif.message }}</p>
+
+            {% if notif.created_by %}
+            <div style="margin-top: 5px; font-size: 0.8rem; color: #9CA3AF;">
+                <i class="fas fa-user"></i> From: {{ notif.created_by.get_full_name|default:"Admin" }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div style="text-align: center; padding: 40px; color: var(--text-light);">
+        <i class="far fa-bell" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+        <p>You're all caught up! No new notifications.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

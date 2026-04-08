@@ -1,0 +1,63 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Manage Results{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Manage Results</h2>
+    <p style="color: var(--text-light); margin-top: 5px;">Select an exam to add or update student marks.</p>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Exam Title</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in exams %}
+            <tr>
+                <td style="font-weight: 500; color: var(--text-main);">{{ exam.title }}</td>
+                <td>
+                    <div style="font-weight: 500; color: var(--secondary);">{{ exam.subject.name }}</div>
+                </td>
+                <td style="color: var(--text-light); font-size: 0.95rem;">
+                    {{ exam.date|date:"d M Y" }}
+                </td>
+                <td>
+                    {% if exam.results.count > 0 %}
+                    <span
+                        style="background: #D1FAE5; color: #059669; padding: 4px 10px; border-radius: 4px; font-weight: 500; font-size: 0.85rem;">
+                        Graded ({{ exam.results.count }})
+                    </span>
+                    {% else %}
+                    <span
+                        style="background: #FEF3C7; color: #D97706; padding: 4px 10px; border-radius: 4px; font-weight: 500; font-size: 0.85rem;">
+                        Pending Grading
+                    </span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'core:add_marks' exam.id %}" class="btn"
+                        style="padding: 6px 15px; font-size: 0.85rem; background: var(--primary); color: white; text-decoration: none;">
+                        <i class="fas fa-edit"></i> Manage Marks
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-clipboard" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    You have no exams assigned to your subjects.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

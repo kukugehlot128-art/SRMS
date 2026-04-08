@@ -1,0 +1,485 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Book Admission - CodeCraft College{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8fafc;
+    }
+    
+    .admission-hero {
+        background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('{% static "images/hero_campus.png" %}') center/cover no-repeat;
+        padding: 6rem 2rem 8rem;
+        text-align: center;
+        color: white;
+        margin-top: -2rem;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        width: 100vw;
+        position: relative;
+    }
+    
+    .admission-hero h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .admission-hero p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-container {
+        max-width: 900px;
+        margin: -4rem auto 4rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+        padding: 3rem;
+        position: relative;
+        z-index: 10;
+        border: 1px solid #f1f5f9;
+    }
+
+    .form-section {
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+    
+    .form-section:last-of-type {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .section-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .section-title i {
+        color: var(--primary);
+        background: #e0e7ff;
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-size: 1.1rem;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        position: relative;
+    }
+    
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+    
+    .input-wrapper i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        font-size: 1rem;
+        transition: color 0.3s;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.8rem 1rem 0.8rem 2.8rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        color: #334155;
+        background-color: #f8fafc;
+        transition: all 0.3s;
+        box-sizing: border-box;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        background-color: white;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    
+    .form-control:focus + i,
+    .input-wrapper:focus-within i {
+        color: var(--primary);
+    }
+    
+    /* File input styling */
+    .file-input-wrapper {
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        background: #f8fafc;
+        transition: all 0.3s;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .file-input-wrapper:hover {
+        border-color: var(--primary-light);
+        background: #f1f5f9;
+    }
+    
+    .file-input-wrapper input[type="file"] {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+    
+    .file-icon {
+        font-size: 2rem;
+        color: #94a3b8;
+        margin-bottom: 0.5rem;
+    }
+    
+    .file-text {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+    
+    .checkbox-container input[type="checkbox"] {
+        margin-top: 0.25rem;
+        width: 1.1rem;
+        height: 1.1rem;
+        cursor: pointer;
+    }
+    
+    .checkbox-container label {
+        font-size: 0.95rem;
+        color: #475569;
+        line-height: 1.5;
+        cursor: pointer;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: white;
+        border: none;
+        padding: 1rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        width: 100%;
+        margin-top: 2rem;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 20px -3px rgba(99, 102, 241, 0.4);
+    }
+
+    .alert {
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .alert-success {
+        background-color: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    @media (max-width: 640px) {
+        .form-container {
+            padding: 2rem 1.5rem;
+            margin-top: -3rem;
+            border-radius: 16px;
+        }
+        .admission-hero {
+            padding: 4rem 1.5rem 6rem;
+        }
+        .admission-hero h1 {
+            font-size: 2.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admission-hero">
+    <h1>Book Your Admission</h1>
+    <p>Take the first step towards a bright future. Fill out the application form below to start your journey at CodeCraft College.</p>
+</div>
+
+<div class="form-container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle"></i> {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form action="{% url 'core:admission' %}" method="POST" enctype="multipart/form-data" id="admissionForm">
+        {% csrf_token %}
+        
+        <!-- Section 1: Personal Details -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-user"></i> Personal Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user-edit"></i>
+                        <input type="text" name="full_name" class="form-control" placeholder="Enter your full name" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date of Birth</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-calendar-alt"></i>
+                        <input type="date" name="dob" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Father's Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-user-tie"></i>
+                        <input type="text" name="father_name" class="form-control" placeholder="Father's full name" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mother's Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-female"></i>
+                        <input type="text" name="mother_name" class="form-control" placeholder="Mother's full name" required>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Gender</label>
+                    <div style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #475569; font-weight: 500;">
+                            <input type="radio" name="gender" value="Male" required> Male
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #475569; font-weight: 500;">
+                            <input type="radio" name="gender" value="Female" required> Female
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 0.5rem; color: #475569; font-weight: 500;">
+                            <input type="radio" name="gender" value="Other" required> Other
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 2: Contact Details -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-address-book"></i> Contact Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Mobile Number</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-phone-alt"></i>
+                        <input type="tel" name="mobile" class="form-control" placeholder="+91 9876543210" pattern="[0-9]{10}" title="Please enter a valid 10-digit mobile number" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" name="email" class="form-control" placeholder="student@example.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label class="form-label">Permanent Address</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-map-marker-alt" style="top: 1.2rem; transform: none;"></i>
+                        <textarea name="address" class="form-control" rows="3" placeholder="Enter your full residential address" required></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Academic Details -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-graduation-cap"></i> Academic Details</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Highest Qualification</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-certificate"></i>
+                        <select name="qualification" class="form-control" style="appearance: none;" required>
+                            <option value="" disabled selected>Select Qualification</option>
+                            <option value="12th">12th Standard / HSC</option>
+                            <option value="Diploma">Diploma</option>
+                            <option value="Graduate">Undergraduate Degree</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Passing Year</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-history"></i>
+                        <input type="number" name="passing_year" class="form-control" placeholder="e.g. 2023" min="2010" max="2026" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Percentage / CGPA Marks</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-percentage"></i>
+                        <input type="number" step="0.01" name="marks" class="form-control" placeholder="e.g. 85.50" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Previous School/College Name</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-school"></i>
+                        <input type="text" name="previous_school" class="form-control" placeholder="Name of institution" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 4: Course Selection -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-book-open"></i> Course Selection</h3>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Select Course</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-laptop-code"></i>
+                        <select name="course" class="form-control" style="appearance: none;" required>
+                            <option value="" disabled selected>Choose a Program</option>
+                            <option value="BCA">Bachelor of Computer Applications (BCA)</option>
+                            <option value="BBA">Bachelor of Business Administration (BBA)</option>
+                            <option value="MBA">Master of Business Administration (MBA)</option>
+                            <option value="BTech">B.Tech (Engineering)</option>
+                            <option value="BCom">Bachelor of Commerce (B.Com)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Admission Year</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-calendar-check"></i>
+                        <select name="admission_year" class="form-control" style="appearance: none;" required>
+                            <option value="2024">2024-2025</option>
+                            <option value="2025">2025-2026</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 5: Document Uploads -->
+        <div class="form-section">
+            <h3 class="section-title"><i class="fas fa-file-upload"></i> Document Uploads</h3>
+            <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 1.5rem;">Please upload clear copies of your documents (JPG, PNG, or PDF formats).</p>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label">Passport Size Photo</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" name="photo" accept="image/*" required>
+                        <i class="fas fa-camera file-icon"></i>
+                        <div class="file-text">Click to upload photo</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Previous Marksheet</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" name="marksheet" accept="image/*,.pdf" required>
+                        <i class="fas fa-file-alt file-icon"></i>
+                        <div class="file-text">Click to upload marksheet</div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Government ID Proof (Aadhaar/PAN)</label>
+                    <div class="file-input-wrapper">
+                        <input type="file" name="id_proof" accept="image/*,.pdf" required>
+                        <i class="fas fa-id-card file-icon"></i>
+                        <div class="file-text">Click to upload ID</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Declaration & Submit -->
+        <div class="form-section" style="border-bottom: none;">
+            <div class="checkbox-container">
+                <input type="checkbox" id="declaration" name="declaration" required>
+                <label for="declaration">
+                    I hereby declare that all the information provided by me in this application is true and correct to the best of my knowledge and belief. I understand that my admission is subject to verification of facts and original documents.
+                </label>
+            </div>
+            
+            <button type="submit" class="btn-submit">
+                Submit Application <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

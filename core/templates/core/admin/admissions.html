@@ -1,0 +1,108 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Admission Book (Admin Status){% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Admission Book</h2>
+    <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+        <input type="text" name="q" placeholder="Search by name, email, mobile, course..." class="form-control" style="width: 250px;" value="{{ query|default_if_none:'' }}">
+        <button type="submit" class="btn" style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </form>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Roll Number</th>
+                <th>Course</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Documents</th>
+                <th>Admission Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for enquiry in admissions %}
+            <tr>
+                <td style="font-weight: 500; color: var(--text-main);">
+                    {{ enquiry.full_name }}
+                </td>
+                <td>
+                    <span style="color: var(--text-light); font-size: 0.85rem; background: #F3F4F6; padding: 2px 8px; border-radius: 4px;">Not Assigned</span>
+                </td>
+                <td>
+                    <span style="font-weight: 500; color: var(--primary);">{{ enquiry.course }}</span>
+                </td>
+                <td>
+                    <span style="font-size: 0.9rem; color: var(--text-light);">{{ enquiry.email }}</span>
+                </td>
+                <td>
+                    <span style="font-size: 0.9rem; color: var(--text-light);">{{ enquiry.mobile }}</span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                        {% if enquiry.photo %}
+                        <a href="{{ enquiry.photo.url }}" target="_blank" style="padding: 4px 8px; background: #E0F2FE; color: #0369A1; border-radius: 6px; font-size: 0.75rem; text-decoration: none;">Photo</a>
+                        {% endif %}
+                        {% if enquiry.marksheet %}
+                        <a href="{{ enquiry.marksheet.url }}" target="_blank" style="padding: 4px 8px; background: #ECFDF5; color: #0F766E; border-radius: 6px; font-size: 0.75rem; text-decoration: none;">Marksheet</a>
+                        {% endif %}
+                        {% if enquiry.id_proof %}
+                        <a href="{{ enquiry.id_proof.url }}" target="_blank" style="padding: 4px 8px; background: #FEF3C7; color: #92400E; border-radius: 6px; font-size: 0.75rem; text-decoration: none;">ID Proof</a>
+                        {% endif %}
+                        {% if not enquiry.photo and not enquiry.marksheet and not enquiry.id_proof %}
+                        <span style="color: var(--text-light); font-size: 0.8rem;">No documents</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td>
+                    {% if enquiry.status == 'Pending' %}
+                    <span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Pending</span>
+                    {% elif enquiry.status == 'Approved' %}
+                    <span style="background: #D1FAE5; color: #065F46; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Approved</span>
+                    {% else %}
+                    <span style="background: #FEE2E2; color: #991B1B; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Rejected</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="enquiry_id" value="{{ enquiry.id }}">
+                            <input type="hidden" name="status" value="Approved">
+                            <button title="Approve" class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: #10B981; color: white;"><i class="fas fa-check"></i></button>
+                        </form>
+                        <form method="POST" style="display:inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="enquiry_id" value="{{ enquiry.id }}">
+                            <input type="hidden" name="status" value="Rejected">
+                            <button title="Reject" class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i class="fas fa-times"></i></button>
+                        </form>
+                        <button onclick="alert('Full Details:\n\nName: {{ enquiry.full_name }}\nDOB: {{ enquiry.dob }}\nFather: {{ enquiry.father_name }}\nMother: {{ enquiry.mother_name }}\nGender: {{ enquiry.gender }}\nAddress: {{ enquiry.address|escapejs }}\nPrevious School: {{ enquiry.previous_school|escapejs }}\nNotes: Previous qualification - {{ enquiry.qualification }} ({{ enquiry.passing_year }}), Marks: {{ enquiry.marks }}%')" class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: var(--secondary); color: white;" title="View Full Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    No admission requests found in the Admission Book.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+    <span style="color: var(--text-light); font-size: 0.9rem;">Showing {{ admissions.count }} request(s)</span>
+</div>
+{% endblock %}

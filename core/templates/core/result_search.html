@@ -1,0 +1,61 @@
+{% extends 'core/base.html' %}
+{% block title %}Search Results - University Portal{% endblock %}
+
+{% block content %}
+<div class="result-portal-container" style="max-width: 800px; margin: 3rem auto; font-family: 'Arial', sans-serif;">
+
+    <div
+        style="background-color: #0d47a1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; border: 2px solid #0d47a1; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        <h2 style="margin: 0; font-size: 24px; font-weight: bold; text-transform: uppercase;">University Examination
+            Department</h2>
+        <p style="margin: 5px 0 0; font-size: 14px;">Student Result Portal</p>
+    </div>
+
+    <div
+        style="background: #f8fafc; border: 2px solid #cbd5e1; border-top: none; border-radius: 0 0 8px 8px; padding: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            style="padding: 12px; margin-bottom: 20px; border-radius: 4px; {% if message.tags == 'error' %}background-color: #fee2e2; border-left: 5px solid #ef4444; color: #b91c1c;{% else %}background-color: #d1fae5; border-left: 5px solid #10b981; color: #047857;{% endif %}">
+            <strong>Notice:</strong> {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="POST" action="{% url 'core:result_search' %}" style="display: grid; gap: 20px;">
+            {% csrf_token %}
+
+            <div style="display: flex; flex-direction: column;">
+                <label style="font-weight: bold; color: #334155; margin-bottom: 8px;">Roll Number / Registration No.
+                    <span style="color:red">*</span></label>
+                <input type="text" name="roll_number" required placeholder="Enter Your Roll Number"
+                    style="padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-size: 16px;">
+            </div>
+
+            <div style="display: flex; flex-direction: column;">
+                <label style="font-weight: bold; color: #334155; margin-bottom: 8px;">Security Captcha: <span style="color:red">*</span></label>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div
+                        style="background: #e2e8f0; border: 1px dashed #64748b; padding: 10px 20px; font-size: 18px; font-weight: bold; letter-spacing: 2px; border-radius: 4px; user-select: none;">
+                        {{ captcha_text }}
+                    </div>
+                    <input type="number" name="captcha_input" required placeholder="Enter Answer"
+                        style="padding: 10px; border: 1px solid #94a3b8; border-radius: 4px; font-size: 16px; flex-grow: 1;">
+                </div>
+            </div>
+
+            <div style="margin-top: 15px; text-align: center;">
+                <button type="submit"
+                    style="background-color: #0d47a1; color: white; border: none; padding: 12px 30px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;">
+                    Search Result
+                </button>
+                <button type="reset"
+                    style="background-color: #64748b; color: white; border: none; padding: 12px 30px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; margin-left: 10px;">
+                    Clear
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

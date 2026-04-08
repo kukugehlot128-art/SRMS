@@ -1,0 +1,64 @@
+{% extends 'core/professor/base.html' %}
+{% block title %}My Subjects{% endblock %}
+{% block page_title %}My Subjects{% endblock %}
+{% block nav_subjects %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>My Subjects</h2>
+        <p>All subjects assigned to you</p>
+    </div>
+</div>
+
+{% if subjects %}
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px">
+    {% for subj in subjects %}
+    <div class="card" style="margin-bottom:0">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
+            <div style="width:50px;height:50px;border-radius:14px;
+        background:linear-gradient(135deg,#6c3dac,#a270dc);
+        display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff">
+                <i class="fas fa-book"></i>
+            </div>
+            <div>
+                <div style="font-weight:700;font-size:16px">{{ subj.name }}</div>
+                <div style="font-size:12px;color:var(--text-muted)">{{ subj.code }}</div>
+            </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+            <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--text-muted)">Course</span>
+                <strong>{{ subj.course.name }}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--text-muted)">Semester</span>
+                <span class="badge badge-info">Semester {{ subj.semester }}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between">
+                <span style="color:var(--text-muted)">Credits</span>
+                <span class="badge badge-purple">{{ subj.credits }} Credits</span>
+            </div>
+        </div>
+        <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;gap:8px">
+            <a href="{% url 'core:professor_attendance' %}?subject={{ subj.id }}" class="btn btn-outline btn-sm"
+                style="flex:1;justify-content:center">
+                <i class="fas fa-calendar-check"></i> Attendance
+            </a>
+            <a href="{% url 'core:professor_students' %}?subject={{ subj.id }}" class="btn btn-outline btn-sm"
+                style="flex:1;justify-content:center">
+                <i class="fas fa-users"></i> Students
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card">
+    <div class="empty-state">
+        <i class="fas fa-book"></i>
+        <p>No subjects assigned to you yet.</p>
+        <p style="font-size:13px;margin-top:8px">Contact the administrator to assign subjects.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

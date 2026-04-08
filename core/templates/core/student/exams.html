@@ -1,0 +1,53 @@
+{% extends 'core/student/base.html' %}
+
+{% block title %}Exams Schedule{% endblock %}
+
+{% block content %}
+<h2 class="page-title">My Exam Schedule</h2>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <thead>
+            <tr style="background: #F9FAFB; border-bottom: 1px solid #E5E7EB;">
+                <th style="padding: 15px; font-weight: 500; color: var(--text-main);">Date & Time</th>
+                <th style="padding: 15px; font-weight: 500; color: var(--text-main);">Subject</th>
+                <th style="padding: 15px; font-weight: 500; color: var(--text-main);">Exam Type</th>
+                <th style="padding: 15px; font-weight: 500; color: var(--text-main);">Marks</th>
+                <th style="padding: 15px; font-weight: 500; color: var(--text-main);">Room</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in exams %}
+            <tr style="border-bottom: 1px solid #E5E7EB;">
+                <td style="padding: 15px;">
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: 600; color: var(--primary);">{{ exam.date|date:"M d, Y" }}</span>
+                        <span style="font-size: 0.85rem; color: var(--text-light);">{{ exam.start_time|time:"H:i" }} -
+                            {{ exam.end_time|time:"H:i" }}</span>
+                    </div>
+                </td>
+                <td style="padding: 15px;">
+                    <span style="font-weight: 500;">{{ exam.subject.name }}</span><br>
+                    <span style="font-size: 0.85rem; color: var(--text-light);">{{ exam.subject.code }}</span>
+                </td>
+                <td style="padding: 15px;">
+                    <span
+                        style="background: rgba(236, 72, 153, 0.1); color: var(--secondary); padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; text-transform: uppercase;">
+                        {{ exam.exam_type.name }}
+                    </span>
+                </td>
+                <td style="padding: 15px; font-weight: 600;">{{ exam.total_marks }}</td>
+                <td style="padding: 15px; color: var(--text-light);">{{ exam.room|default:"TBA" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-light);">
+                    <i class="far fa-calendar-times" style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                    No upcoming exams scheduled for your enrolled subjects.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

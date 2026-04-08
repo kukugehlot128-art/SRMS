@@ -1,0 +1,54 @@
+{% extends 'core/professor/base.html' %}
+{% block title %}Add Assignment{% endblock %}
+{% block page_title %}Add Assignment{% endblock %}
+{% block nav_assignments %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Add Assignment</h2>
+        <p>Create a new assignment for your students</p>
+    </div>
+    <a href="{% url 'core:professor_assignments' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card" style="max-width:700px">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Assignment Title</label>
+                <input type="text" name="title" placeholder="e.g. Data Structures Homework 1" required>
+            </div>
+            <div class="form-group">
+                <label>Subject</label>
+                <select name="subject" required>
+                    <option value="">-- Select Subject --</option>
+                    {% for s in my_subjects %}
+                    <option value="{{ s.id }}">{{ s.code }} - {{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Due Date</label>
+                <input type="date" name="due_date" required>
+            </div>
+            <div class="form-group">
+                <label>Max Marks</label>
+                <input type="number" name="max_marks" value="10" min="1" max="100">
+            </div>
+            <div class="form-group full">
+                <label>Description / Instructions</label>
+                <textarea name="description" placeholder="Describe the assignment..." required></textarea>
+            </div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:12px">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Create Assignment
+            </button>
+            <a href="{% url 'core:professor_assignments' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

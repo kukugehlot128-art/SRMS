@@ -1,0 +1,64 @@
+{% extends 'core/professor/base.html' %}
+{% block title %}Add Result{% endblock %}
+{% block page_title %}Add Result{% endblock %}
+{% block nav_results %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Add / Update Result</h2>
+        <p>Enter marks for a student</p>
+    </div>
+    <a href="{% url 'core:professor_results_list' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card" style="max-width:700px">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Exam</label>
+                <select name="exam" required>
+                    <option value="">-- Select Exam --</option>
+                    {% for e in my_exams %}
+                    <option value="{{ e.id }}">{{ e.name }} ({{ e.subject.code }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Student</label>
+                <select name="student" required>
+                    <option value="">-- Select Student --</option>
+                    {% for s in all_students %}
+                    <option value="{{ s.id }}">{{ s.user.get_full_name }} ({{ s.roll_number }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Marks Obtained</label>
+                <input type="number" name="marks_obtained" step="0.01" min="0" placeholder="e.g. 78.5" required>
+            </div>
+            <div class="form-group">
+                <label>Grade</label>
+                <select name="grade">
+                    <option value="">-- Select Grade --</option>
+                    {% for val, label in grade_choices %}
+                    <option value="{{ val }}">{{ val }} — {{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group full">
+                <label>Remarks (optional)</label>
+                <textarea name="remarks" placeholder="Optional remarks about performance..."></textarea>
+            </div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:12px">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save"></i> Save Result
+            </button>
+            <a href="{% url 'core:professor_results_list' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Exam Schedule{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Exam Schedule</h2>
+    <p style="color: var(--text-light); margin-top: 5px;">Showing scheduled exams for your assigned subjects.</p>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Exam Title</th>
+                <th>Subject & Course</th>
+                <th>Date</th>
+                <th>Time Range</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exam in exams %}
+            <tr>
+                <td style="font-weight: 500; color: var(--text-main);">{{ exam.title }}</td>
+                <td>
+                    <div style="font-weight: 500; color: var(--secondary);">{{ exam.subject.name }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light);">{{ exam.semester.course.name }} (Sem {{ exam.semester.name }})</div>
+                </td>
+                <td>
+                    <span
+                        style="background: #ECFDF5; color: #059669; padding: 4px 10px; border-radius: 4px; font-weight: 500; font-size: 0.9rem;">
+                        <i class="fas fa-calendar-day"></i> {{ exam.date|date:"d M Y" }}
+                    </span>
+                </td>
+                <td style="color: var(--text-light); font-size: 0.95rem;">
+                    <i class="far fa-clock"></i> {{ exam.start_time|time:"H:i A" }} - {{ exam.end_time|time:"H:i A" }}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-clipboard-list"
+                        style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    No exams have been scheduled for your subjects yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

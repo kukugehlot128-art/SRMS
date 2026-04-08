@@ -1,0 +1,69 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Manage Professors{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Professor Directory</h2>
+    <a href="{% url 'core:create_professor' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Professor
+    </a>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Professor Name</th>
+                    <th>Department</th>
+                    <th>Contact Info</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for prof in professors %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-light); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">
+                                {{ prof.user.first_name|first|upper }}
+                            </div>
+                            <div>
+                                <div style="font-weight: 500; color: var(--text-main);">{{ prof.user.get_full_name }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span style="font-weight: 500;">{{ prof.department|default:"Unassigned" }}</span></td>
+                    <td>
+                        <div style="font-size: 0.85rem; color: var(--text-light);"><i class="fas fa-envelope"></i> {{ prof.user.email }}</div>
+                        {% if prof.user.phone %}<div style="font-size: 0.85rem; color: var(--text-light);"><i class="fas fa-phone"></i> {{ prof.user.phone }}</div>{% endif %}
+                    </td>
+                    <td style="color: var(--text-light); font-size: 0.9rem;">
+                        {{ prof.date_of_joining|date:"M d, Y"|default:"N/A" }}
+                    </td>
+                    <td>
+                        <div style="display: flex; gap: 5px;">
+                            <a href="{% url 'core:professor_detail' prof.id %}" class="btn" style="padding: 5px 10px; font-size: 0.85rem; background: var(--secondary); color: white;" title="View Details"><i class="fas fa-eye"></i></a>
+                            <a href="{% url 'core:update_professor' prof.id %}" class="btn"
+                                style="padding: 5px 10px; font-size: 0.85rem; background: #4F46E5; color: white;"><i
+                                    class="fas fa-edit"></i></a>
+                            <a href="{% url 'core:delete_professor' prof.id %}" class="btn"
+                                style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i
+                                    class="fas fa-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-light);">
+                        No professors found. Click "Add New Professor" to recruit faculty.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

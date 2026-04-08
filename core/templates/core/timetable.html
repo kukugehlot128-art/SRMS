@@ -1,0 +1,295 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Class Timetable | {% endblock %}
+
+{% block content %}
+<style>
+    .timetable-hero {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        padding: 80px 0 60px;
+        color: white;
+        text-align: center;
+        border-radius: 0 0 40px 40px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 50px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .timetable-hero::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: url('https://www.transparenttextures.com/patterns/cubes.png');
+        opacity: 0.1;
+    }
+
+    .timetable-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 20px;
+        margin-bottom: 80px;
+    }
+
+    /* Course Tabs */
+    .course-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 40px;
+    }
+
+    .course-tab {
+        padding: 12px 35px;
+        background: white;
+        color: #1e3c72;
+        border: 2px solid #1e3c72;
+        border-radius: 30px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+
+    .course-tab:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .course-tab.active {
+        background: #1e3c72;
+        color: white;
+        box-shadow: 0 8px 25px rgba(30, 60, 114, 0.3);
+    }
+
+    /* Timetable Grid/Table */
+    .timetable-wrapper {
+        display: none;
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .timetable-wrapper.active {
+        display: block;
+    }
+
+    .timetable-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0 15px;
+    }
+
+    .timetable-header {
+        background: #f8f9fa;
+        color: #495057;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 1px;
+    }
+
+    .timetable-header th {
+        padding: 15px 20px;
+        border: none;
+        text-align: left;
+    }
+
+    .timetable-row {
+        background: white;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+    }
+
+    .timetable-row:hover {
+        transform: scale(1.01) translateY(-2px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border-left: 5px solid #2a5298;
+    }
+
+    .timetable-row td {
+        padding: 20px;
+        vertical-align: middle;
+        border-top: 1px solid #f1f3f5;
+        border-bottom: 1px solid #f1f3f5;
+    }
+
+    .timetable-row td:first-child {
+        border-left: 1px solid #f1f3f5;
+        border-radius: 15px 0 0 15px;
+    }
+
+    .timetable-row td:last-child {
+        border-right: 1px solid #f1f3f5;
+        border-radius: 0 15px 15px 0;
+    }
+
+    .day-badge {
+        display: inline-block;
+        padding: 8px 15px;
+        background: rgba(42, 82, 152, 0.1);
+        color: #2a5298;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .time-badge {
+        color: #e67e22;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .subject-name {
+        font-weight: 700;
+        color: #2c3e50;
+        font-size: 1.1rem;
+        margin-bottom: 4px;
+    }
+
+    .faculty-name {
+        color: #6c757d;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .room-badge {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.03);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="timetable-hero">
+    <h1 class="display-4 fw-bold mb-3" data-aos="fade-down">Class Timetable</h1>
+    <p class="lead" data-aos="fade-up" data-aos-delay="100">Stay organized and never miss a class. View your academic schedule below.</p>
+</div>
+
+<div class="timetable-container" data-aos="fade-up">
+    <!-- Course Toggles -->
+    <div class="course-tabs" id="courseTabs">
+        {% for course in courses %}
+            <div class="course-tab {% if forloop.first %}active{% endif %}" onclick="switchCourse('{{ course }}')">
+                {{ course }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Timetable Content -->
+    {% for course in courses %}
+    <div class="timetable-wrapper {% if forloop.first %}active{% endif %}" id="timetable-{{ course }}">
+        
+        <div class="table-responsive">
+            <table class="timetable-table">
+                <thead>
+                    <tr class="timetable-header">
+                        <th>Day</th>
+                        <th>Time</th>
+                        <th>Subject & Faculty</th>
+                        <th>Room</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in timetables %}
+                        {% if item.course_name == course %}
+                            <tr class="timetable-row">
+                                <td>
+                                    <span class="day-badge"><i class="fas fa-calendar-day me-2"></i>{{ item.day }}</span>
+                                </td>
+                                <td>
+                                    <div class="time-badge">
+                                        <i class="far fa-clock"></i>
+                                        {{ item.start_time|time:"h:i A" }} - {{ item.end_time|time:"h:i A" }}
+                                    </div>
+                                    {% if item.duration %}
+                                    <div style="font-size: 0.8rem; color: #6c757d; margin-top: 4px; font-weight: 600;">
+                                        <i class="fas fa-hourglass-half"></i> {{ item.duration }}
+                                    </div>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="subject-name">{{ item.subject_name }}</div>
+                                    <div class="faculty-name"><i class="fas fa-chalkboard-teacher"></i> Prof. {{ item.faculty_name }}</div>
+                                </td>
+                                <td>
+                                    <span class="room-badge"><i class="fas fa-door-open me-2"></i>{{ item.room_number }}</span>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- We will handle empty states via JS to avoid messy template logic -->
+        </div>
+
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    function checkEmptyStates() {
+        const wrappers = document.querySelectorAll('.timetable-wrapper');
+        wrappers.forEach(wrapper => {
+            const rows = wrapper.querySelectorAll('.timetable-row');
+            if(rows.length === 0) {
+                const tbody = wrapper.querySelector('tbody');
+                const courseName = wrapper.id.replace('timetable-', '');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4">
+                            <div class="empty-state">
+                                <i class="fas fa-folder-open"></i>
+                                <h3>No classes scheduled</h3>
+                                <p class="text-muted">The timetable for ${courseName} has not been published yet.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+    }
+
+    function switchCourse(courseId) {
+        // Update tabs
+        document.querySelectorAll('.course-tab').forEach(tab => {
+            tab.classList.remove('active');
+            if(tab.innerText.trim() === courseId) tab.classList.add('active');
+        });
+
+        // Update content wrappers
+        document.querySelectorAll('.timetable-wrapper').forEach(wrapper => {
+            wrapper.classList.remove('active');
+            if(wrapper.id === 'timetable-' + courseId) wrapper.classList.add('active');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', checkEmptyStates);
+</script>
+
+{% endblock %}

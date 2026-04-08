@@ -1,0 +1,94 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Update Subject{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Update Subject: {{ subject.code }}</h2>
+    <a href="{% url 'core:manage_subjects' %}" class="btn"
+        style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Subjects
+    </a>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Subject Name</label>
+                <input type="text" name="name" class="form-control" required value="{{ subject.name }}">
+            </div>
+            <div class="form-group">
+                <label>Subject Code</label>
+                <input type="text" name="code" class="form-control" required value="{{ subject.code }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Course</label>
+            <select id="course_dropdown" class="form-control" required onchange="filterStreams()">
+                <option value="">-- Select Course --</option>
+                {% for course in courses %}
+                <option value="{{ course.id }}" {% if subject.semester.course.id == course.id %}selected{% endif %}>{{ course.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Stream</label>
+            <select id="stream_dropdown" name="semester_id" class="form-control" required>
+                {% for semester in semesters %}
+                <option value="{{ semester.id }}" data-course="{{ semester.course.id }}" {% if subject.semester.id == semester.id %}selected{% endif %}>{{ semester.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <script>
+            function filterStreams() {
+                const courseId = document.getElementById('course_dropdown').value;
+                const streamSelect = document.getElementById('stream_dropdown');
+                const options = streamSelect.options;
+
+                let hasValid = false;
+                for (let i = 0; i < options.length; i++) {
+                    const option = options[i];
+                    if (option.getAttribute('data-course') === courseId) {
+                        option.style.display = 'block';
+                        hasValid = true;
+                    } else {
+                        option.style.display = 'none';
+                    }
+                }
+                
+                // Only reset if current value is hidden
+                if (streamSelect.options[streamSelect.selectedIndex] && 
+                    streamSelect.options[streamSelect.selectedIndex].style.display === 'none') {
+                    streamSelect.value = "";
+                }
+            }
+            document.addEventListener('DOMContentLoaded', filterStreams);
+        </script>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Credits</label>
+                <input type="number" name="credits" class="form-control" min="1" max="10" value="{{ subject.credits }}" required>
+            </div>
+        </div>
+
+        <div class="form-group" style="padding-top: 15px; border-top: 1px dashed #E5E7EB; margin-top: 15px;">
+            <label style="color: var(--secondary);"><i class="fas fa-chalkboard-teacher"></i> Assigned Professor</label>
+            <select name="professor_id" class="form-control">
+                <option value="">-- Leave Unassigned --</option>
+                {% for prof in professors %}
+                <option value="{{ prof.id }}" {% if subject.professor and subject.professor.id == prof.id %}selected{% endif %}>{{ prof.get_full_name|default:prof.username }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 20px;">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

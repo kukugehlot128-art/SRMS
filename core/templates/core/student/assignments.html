@@ -1,0 +1,63 @@
+{% extends 'core/student/base.html' %}
+
+{% block title %}Assignments{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Course Assignments</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px;">
+    {% for assign in assignments %}
+    <div class="card" style="border-left: 4px solid var(--accent); display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+            <h3 style="color: var(--text-main); font-size: 1.1rem; margin-right: 15px;">{{ assign.title }}</h3>
+            <span
+                style="background: rgba(139, 92, 246, 0.1); color: var(--accent); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; white-space: nowrap;">
+                {{ assign.max_marks }} Marks
+            </span>
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <span
+                style="display: inline-block; background: #F3F4F6; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; margin-bottom: 10px;">
+                {{ assign.subject.name }} ({{ assign.subject.code }})
+            </span>
+            <p style="color: var(--text-light); font-size: 0.9rem; line-height: 1.5;">{{ assign.description }}</p>
+        </div>
+
+        <div
+            style="margin-top: auto; border-top: 1px dashed #E5E7EB; padding-top: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+            <span style="color: var(--text-light);">
+                <i class="fas fa-calendar-plus text-primary"></i> Posted: {{ assign.created_at|date:"M d" }}
+            </span>
+            <span style="color: #EF4444; font-weight: bold;">
+                <i class="fas fa-calendar-times"></i> Due: {{ assign.due_date|date:"M d, Y" }}
+            </span>
+        </div>
+
+        <div style="margin-top: 15px; text-align: right; border-top: 1px dashed #E5E7EB; padding-top: 10px;">
+            {% if assign.id in my_submissions %}
+            <span
+                style="background: #D1FAE5; color: #059669; padding: 6px 12px; border-radius: 4px; font-weight: 500; font-size: 0.85rem; display: inline-block; margin-right: 10px;">
+                <i class="fas fa-check-circle"></i> Submitted
+            </span>
+            <a href="{% url 'core:submit_assignment' assign.id %}" class="btn"
+                style="padding: 6px 15px; font-size: 0.85rem; background: #9CA3AF; color: white; text-decoration: none;">
+                View Status
+            </a>
+            {% else %}
+            <a href="{% url 'core:submit_assignment' assign.id %}" class="btn"
+                style="padding: 6px 15px; font-size: 0.85rem; background: var(--accent); color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fas fa-upload"></i> Submit Work
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% empty %}
+    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-light);">
+        <i class="fas fa-clipboard-list" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+        <h3>No Pending Assignments</h3>
+        <p>Awesome! You have no assignments due.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

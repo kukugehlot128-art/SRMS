@@ -1,0 +1,389 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}EduResult – Student Result Management System{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        overflow-x: hidden;
+    }
+
+    .hero {
+        background: url('{% static "images/hero_campus.png" %}') center/cover no-repeat;
+        padding: 10rem 2rem;
+        border-radius: 0;
+        margin-top: -2rem;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        width: 100vw;
+        text-align: center;
+        margin-bottom: 4rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-content {
+        background: rgba(255, 255, 255, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        color: var(--text-main);
+        padding: 4rem 3rem;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0,0,0,0.15);
+        max-width: 800px;
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        border: 1px solid rgba(255,255,255,0.4);
+    }
+    
+    .hero-content h1 {
+        font-size: 3.8rem;
+        margin-bottom: 1rem;
+        font-weight: 800;
+        color: var(--primary);
+        letter-spacing: -1px;
+    }
+    
+    .hero-content p {
+        font-size: 1.3rem;
+        color: var(--text-light);
+        margin-bottom: 2.5rem;
+        line-height: 1.6;
+    }
+    
+    .section-title {
+        font-size: 1.75rem;
+        color: var(--text-main);
+        margin-bottom: 1.5rem;
+        border-bottom: 3px solid var(--primary-light);
+        padding-bottom: 0.5rem;
+        display: inline-block;
+    }
+
+    .section-container {
+        margin-bottom: 4rem;
+    }
+    
+    .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+    
+    .card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+        flex: 1;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        color: var(--primary-dark);
+    }
+    
+    .card-text {
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+
+    .card-footer {
+        padding: 1rem 1.5rem;
+        background-color: #f9fafb;
+        border-top: 1px solid #e5e7eb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge {
+        background-color: #e0e7ff;
+        color: var(--primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .course-icon {
+        font-size: 2.5rem;
+        color: var(--primary-light);
+        margin-bottom: 1rem;
+    }
+
+    .result-search-section {
+        background: linear-gradient(135deg, var(--secondary) 0%, #059669 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 3rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 3rem;
+        box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
+    }
+    
+    .result-search-content {
+        max-width: 50%;
+    }
+    
+    .result-search-content h2 {
+        font-size: 2.25rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+    }
+    
+    .result-search-content p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 0;
+    }
+    
+    .result-search-btn-container {
+        flex-shrink: 0;
+    }
+    
+    .btn-white {
+        background: white;
+        color: var(--secondary);
+        padding: 1rem 2.5rem;
+        border-radius: 9999px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-white:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.15);
+    }
+    
+    @media (max-width: 768px) {
+        .result-search-section {
+            flex-direction: column;
+            text-align: center;
+            padding: 2rem;
+        }
+        .result-search-content {
+            max-width: 100%;
+            margin-bottom: 2rem;
+        }
+    }
+
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero">
+    <div class="hero-content">
+        <h1>Welcome to CodeCraft College</h1>
+        <p>A premier institution dedicated to empowering the next generation of tech leaders and business innovators.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center; align-items: center;">
+            <a href="{% url 'core:admission' %}" class="btn" style="background: var(--primary); color: white; font-size: 1.15rem; padding: 0.85rem 2rem; border-radius: 9999px; font-weight: 600; text-decoration: none; display: inline-block; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 20px 25px -5px rgba(79, 70, 229, 0.4)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 15px -3px rgba(79, 70, 229, 0.3)';">Book Admission <i class="fas fa-arrow-right" style="margin-left: 8px;"></i></a>
+            <a href="{% url 'core:admit_card_search' %}" class="btn" style="background: white; color: var(--primary); font-size: 1.15rem; padding: 0.85rem 2rem; border-radius: 9999px; font-weight: 600; text-decoration: none; display: inline-block; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); border: 2px solid var(--primary);" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 20px 25px -5px rgba(0, 0, 0, 0.15)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 15px -3px rgba(0, 0, 0, 0.1)';"><i class="fas fa-download" style="margin-right: 8px;"></i> Download Admit Card</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- Programs Section -->
+<div class="section-container" style="margin-top: 4rem;">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="font-size: 2.25rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem;">Our Flagship Programs</h2>
+        <p style="color: #64748b; font-size: 1.1rem; max-width: 600px; margin: 0 auto;">Discover our industry-aligned undergraduate and postgraduate programs designed for the future.</p>
+    </div>
+    
+    {% if courses %}
+        <div class="grid" style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 2.5rem;">
+            {% for course in courses %}
+            <div class="card" style="border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.05); border: 1px solid #f1f5f9; overflow: hidden; transition: all 0.4s;" onmouseover="this.style.transform='translateY(-10px)'; this.style.boxShadow='0 20px 40px -10px rgba(15, 23, 42, 0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 10px 25px -5px rgba(15, 23, 42, 0.05)';">
+                <div style="height: 220px; overflow: hidden; position: relative;">
+                    {% if course.image %}
+                        <img src="{{ course.image.url }}" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    {% else %}
+                        <div style="width: 100%; height: 100%; background: #e2e8f0; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-image" style="font-size: 3rem; color: #94a3b8;"></i>
+                        </div>
+                    {% endif %}
+                    <span style="position: absolute; top: 1rem; right: 1rem; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); color: var(--primary); font-size: 0.85rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 9999px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 10; text-transform: uppercase;">{{ course.category|default:"Course" }}</span>
+                </div>
+                <div style="padding: 2rem; display: flex; flex-direction: column; background: white; flex-grow: 1;">
+                    <h3 style="font-size: 1.35rem; font-weight: 700; color: #0f172a; margin-bottom: 1rem; line-height: 1.4;">{{ course.name }}</h3>
+                    <p style="color: #64748b; line-height: 1.6; margin-bottom: 1.5rem;">{{ course.description|truncatewords:20|default:"No description provided." }}</p>
+                    <div style="display: flex; gap: 1rem; margin-top: auto; padding-top: 1.5rem; border-top: 1px solid #f1f5f9;">
+                        <span style="color: #475569; font-size: 0.9rem; font-weight: 500;"><i class="far fa-clock" style="color: var(--primary); margin-right: 5px;"></i> {{ course.duration|default:"Duration NA" }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="padding: 5rem 2rem; text-align: center; background: white; border-radius: 24px; border: 1px dashed #cbd5e1;">
+            <i class="fas fa-folder-open" style="font-size: 5rem; color: #cbd5e1; margin-bottom: 2rem;"></i>
+            <h3 style="font-size: 1.75rem; color: #475569; font-weight: 600;">No courses currently available</h3>
+            <p style="color: #64748b; font-size: 1.1rem;">Courses added from the Admin Panel will appear here.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Notifications and Events Grid -->
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));">
+    
+    <!-- Latest Notifications -->
+    <div class="section-container">
+        <h2 class="section-title">Latest Notifications</h2>
+        {% if notifications %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for notification in notifications %}
+                    <div class="card" style="flex-direction: row; align-items: center; padding: 1rem; padding-right: 1.5rem;">
+                        <div style="background: #e0e7ff; color: var(--primary); width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-right: 1rem; font-size: 1.2rem;">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem;">{{ notification.title }}</h3>
+                            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0;">{{ notification.message|truncatewords:12 }}</p>
+                        </div>
+                        <div style="color: var(--text-light); font-size: 0.8rem; text-align: right; min-width: 70px;">
+                            {{ notification.created_at|date:"M d" }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card p-4 text-center" style="color: #6b7280;">
+                <p>No new notifications.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Upcoming Events -->
+    <div class="section-container">
+        <h2 class="section-title">Upcoming Events</h2>
+        {% if events %}
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                {% for event in events %}
+                    <div class="card" style="flex-direction: row; border-left: 4px solid var(--secondary);">
+                        <div style="background: #f9fafb; padding: 1rem; width: 80px; text-align: center; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: center;">
+                            <span style="display: block; font-size: 1.5rem; font-weight: 700; color: var(--secondary); line-height: 1;">{{ event.event_date|date:"d" }}</span>
+                            <span style="display: block; font-size: 0.9rem; font-weight: 600; color: #6b7280; text-transform: uppercase;">{{ event.event_date|date:"M" }}</span>
+                        </div>
+                        <div style="padding: 1rem; flex: 1;">
+                            <h3 style="font-size: 1.15rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.25rem;">{{ event.title }}</h3>
+                            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 0;"><i class="fas fa-calendar" style="margin-right: 5px;"></i> {{ event.event_date|date:"F d, Y" }}</p>
+                            <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">{{ event.description|truncatewords:10 }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card p-4 text-center" style="color: #6b7280;">
+                <p>No upcoming events.</p>
+            </div>
+        {% endif %}
+    </div>
+    
+</div>
+
+<!-- Exam Timetable Section -->
+<div class="section-container" style="margin-top: 2rem;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem;">
+        <h2 class="section-title" style="margin-bottom: 0;">Upcoming Exams</h2>
+        <a href="{% url 'core:timetable_page' %}" style="color: var(--primary); text-decoration: none; font-weight: 500;">View Full Timetable <i class="fas fa-arrow-right"></i></a>
+    </div>
+    
+    {% if exams %}
+        <div style="background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e5e7eb; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                        <th style="padding: 1rem 1.5rem; font-weight: 600; color: #4b5563;">Date</th>
+                        <th style="padding: 1rem 1.5rem; font-weight: 600; color: #4b5563;">Course & Stream</th>
+                        <th style="padding: 1rem 1.5rem; font-weight: 600; color: #4b5563;">Subject</th>
+                        <th style="padding: 1rem 1.5rem; font-weight: 600; color: #4b5563;">Type</th>
+                        <th style="padding: 1rem 1.5rem; font-weight: 600; color: #4b5563;">Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in exams %}
+                    <tr style="border-bottom: 1px solid #e5e7eb; transition: background-color 0.2s; cursor: pointer;" onmouseover="this.style.backgroundColor='#f9fafb'" onmouseout="this.style.backgroundColor='transparent'" onclick="window.location.href='{% url 'core:admit_card_search' %}'" title="Click to get Admit Card">
+                        <td style="padding: 1rem 1.5rem; font-weight: 500; color: var(--primary-dark);">{{ exam.date|date:"d M Y" }}</td>
+                        <td style="padding: 1rem 1.5rem;">{{ exam.semester.course.code }} - {{ exam.semester.name }}</td>
+                        <td style="padding: 1rem 1.5rem; font-weight: 500;">{{ exam.subject.name }}</td>
+                        <td style="padding: 1rem 1.5rem;"><span style="background: #e0e7ff; color: var(--primary); padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.85rem;">{{ exam.exam_type.name }}</span></td>
+                        <td style="padding: 1rem 1.5rem; color: #6b7280;"><i class="far fa-clock" style="margin-right: 5px;"></i> {{ exam.start_time|time:"h:i A" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="card p-4 text-center" style="color: #6b7280; padding: 2rem;">
+            <p><i class="fas fa-calendar-check" style="font-size: 2rem; color: #d1d5db; margin-bottom: 1rem; display: block;"></i> No upcoming exams scheduled.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Find Your Result Section -->
+<div class="result-search-section">
+    <div class="result-search-content">
+        <h2>Student Result</h2>
+        <p>Check your latest semester exam results quickly and easily by entering your Roll Number and Course details.</p>
+    </div>
+    <div class="result-search-btn-container">
+        <a href="{% url 'core:result_search' %}" class="btn-white">
+            View Result <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
+        </a>
+    </div>
+</div>
+
+<!-- About Section -->
+<div class="section-container" style="display: flex; gap: 3rem; align-items: center; background: white; padding: 4rem; border-radius: 20px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); margin-top: 4rem; margin-bottom: 2rem; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 300px;">
+        <h2 style="font-size: 2.25rem; color: var(--text-main); margin-bottom: 1.5rem; font-weight: 700;">About CodeCraft College</h2>
+        <div style="width: 60px; height: 4px; background: var(--primary); margin-bottom: 2rem; border-radius: 2px;"></div>
+        <p style="color: var(--text-light); font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem;">
+            CodeCraft College (कोडक्राफ्ट महाविद्यालय) is a pioneering educational institution focused on bridging the gap between academic learning and industry requirements. We specialize in providing world-class education in Computer Applications, Business Administration, and emerging technologies.
+        </p>
+        <p style="color: var(--text-light); font-size: 1.1rem; line-height: 1.8; margin-bottom: 2rem;">
+            With state-of-the-art infrastructure, experienced faculty, and a curriculum designed for the modern world, we ensure our students are well-prepared to tackle global challenges and excel in their careers.
+        </p>
+        <a href="{% url 'core:about' %}" style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary); color: white; padding: 0.75rem 2rem; border-radius: 9999px; font-weight: 600; text-decoration: none; font-size: 1rem; transition: background-color 0.3s, transform 0.3s;" onmouseover="this.style.backgroundColor='var(--primary-dark)'; this.style.transform='translateY(-2px)';" onmouseout="this.style.backgroundColor='var(--primary)'; this.style.transform='translateY(0)';">Read More <i class="fas fa-arrow-right"></i></a>
+    </div>
+    <div style="flex: 1; min-width: 300px; border-radius: 20px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;">
+        <img src="{% static 'images/about_student.png' %}" alt="About Student" style="width: 100%; height: 400px; object-fit: cover; display: block; transition: transform 0.8s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <div style="position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%); padding: 3rem 2rem 1.5rem; pointer-events: none;">
+            <span style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: inline-block;">Spotlight</span>
+            <h3 style="color: white; font-size: 1.8rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 12px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                <i class="fas fa-user-graduate" style="color: var(--primary-light);"></i> About Student
+            </h3>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

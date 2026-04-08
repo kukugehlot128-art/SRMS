@@ -1,0 +1,68 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Student Details: {{ student.roll_number }}{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Student Profile: {{ student.user.get_full_name }}</h2>
+    <a href="{% url 'core:manage_students' %}" class="btn"
+        style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Students
+    </a>
+</div>
+
+<div class="card" style="max-width: 900px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 15px;">
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <div style="width: 80px; height: 80px; background: var(--primary-light); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold;">
+                {{ student.user.first_name|first|upper }}{{ student.user.last_name|first|upper }}
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1.5rem; color: var(--text-main);">{{ student.user.get_full_name }}</h3>
+                <p style="margin: 5px 0 0; color: var(--text-light);"><i class="fas fa-id-card"></i> {{ student.roll_number }}</p>
+                {% if student.enrollment_number %}<p style="margin: 5px 0 0; color: var(--text-light);"><i class="fas fa-hashtag"></i> Enrollment: {{ student.enrollment_number }}</p>{% endif %}
+            </div>
+        </div>
+        <a href="{% url 'core:update_student' student.id %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Profile
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <!-- Left Column -->
+        <div>
+            <h4 style="color: var(--secondary); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Personal Info</h4>
+            <table style="width: 100%; border: none;">
+                <tr><td style="padding: 8px 0; color: var(--text-light); width: 120px;">Email</td><td style="font-weight: 500;">{{ student.user.email }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Phone</td><td style="font-weight: 500;">{{ student.user.phone|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Date of Birth</td><td style="font-weight: 500;">{{ student.date_of_birth|date:"M d, Y"|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Address</td><td style="font-weight: 500;">{{ student.address|default:"N/A" }}</td></tr>
+            </table>
+
+            <h4 style="color: var(--secondary); margin: 25px 0 15px;"><i class="fas fa-users"></i> Family Details</h4>
+            <table style="width: 100%; border: none;">
+                <tr><td style="padding: 8px 0; color: var(--text-light); width: 120px;">Father's Name</td><td style="font-weight: 500;">{{ student.father_name|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Mother's Name</td><td style="font-weight: 500;">{{ student.mother_name|default:"N/A" }}</td></tr>
+            </table>
+        </div>
+
+        <!-- Right Column -->
+        <div>
+            <h4 style="color: var(--secondary); margin-bottom: 15px;"><i class="fas fa-graduation-cap"></i> Academic Details</h4>
+            <table style="width: 100%; border: none;">
+                <tr><td style="padding: 8px 0; color: var(--text-light); width: 120px;">Course</td><td style="font-weight: 500;">{{ student.course.name|default:"Unassigned" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Stream</td><td style="font-weight: 500;">{{ student.semester.name|default:"Unassigned" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Admission Year</td><td style="font-weight: 500;">{{ student.admission_year|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Admission Date</td><td style="font-weight: 500;">{{ student.admission_date|date:"M d, Y" }}</td></tr>
+            </table>
+            
+            {% if student.description %}
+            <h4 style="color: var(--secondary); margin: 25px 0 15px;"><i class="fas fa-file-alt"></i> Description</h4>
+            <p style="line-height: 1.6; color: var(--text-main); background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
+                {{ student.description }}
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Manage Notifications{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2 class="page-title" style="margin: 0;">Sent Notifications</h2>
+    <button class="btn" style="background: var(--primary); display: flex; align-items: center; gap: 8px;"
+        onclick="document.getElementById('addModal').style.display='flex'">
+        <i class="fas fa-paper-plane"></i> Send Notification
+    </button>
+</div>
+
+<!-- Modal for Sending Notification -->
+<div id="addModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="card" style="width: 100%; max-width: 500px; position: relative;">
+        <button onclick="document.getElementById('addModal').style.display='none'"
+            style="position: absolute; right: 20px; top: 20px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+        <h3 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #E5E7EB;">Send Notification to
+            Students</h3>
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Notification Title</label>
+                <input type="text" name="title" class="form-control" required
+                    placeholder="e.g. Tomorrow's class shifted">
+            </div>
+
+            <div class="form-group">
+                <label>Notification Type</label>
+                <select name="notif_type" class="form-control" required>
+                    <option value="general">General</option>
+                    <option value="exam">Exam Related</option>
+                    <option value="result">Result Related</option>
+                    <option value="assignment">Assignment</option>
+                    <option value="event">Event</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Message Content</label>
+                <textarea name="message" class="form-control" rows="4" required
+                    placeholder="Type your message here..."></textarea>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; justify-content: center; background: #10B981;">
+                <i class="fas fa-paper-plane"></i> Send Notification
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Message</th>
+                <th>Sent Target</th>
+                <th>Date Sent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for notif in notifications %}
+            <tr>
+                <td style="font-weight: 500; color: var(--text-main);">{{ notif.title }}</td>
+                <td>
+                    {% if notif.notif_type == 'exam' %}
+                    <span
+                        style="background: #FEF3C7; color: #D97706; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-file-alt"></i> Exam</span>
+                    {% elif notif.notif_type == 'result' %}
+                    <span
+                        style="background: #E0E7FF; color: #4338CA; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-chart-bar"></i> Result</span>
+                    {% elif notif.notif_type == 'assignment' %}
+                    <span
+                        style="background: #D1FAE5; color: #059669; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-tasks"></i> Assignment</span>
+                    {% elif notif.notif_type == 'event' %}
+                    <span
+                        style="background: #FCE7F3; color: #DB2777; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-calendar-alt"></i> Event</span>
+                    {% else %}
+                    <span
+                        style="background: #F3F4F6; color: #4B5563; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;"><i
+                            class="fas fa-bullhorn"></i> General</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-light); font-size: 0.9rem;"
+                        title="{{ notif.message }}">
+                        {{ notif.message }}
+                    </div>
+                </td>
+                <td><span style="font-weight: 500; color: var(--secondary);">{{ notif.get_target_role_display }}</span>
+                </td>
+                <td style="color: var(--text-light); font-size: 0.9rem;">
+                    {{ notif.created_at|date:"M d, Y" }} <br>
+                    <small>{{ notif.created_at|time:"H:i A" }}</small>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-bell-slash" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    You haven't sent any notifications yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Close modal when clicking outside -->
+<script>
+    window.onclick = function (event) {
+        let modal = document.getElementById('addModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

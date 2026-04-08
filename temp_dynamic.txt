@@ -1,0 +1,27 @@
+def dynamic_create_result(request):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        subject_id = request.POST.get('subject_id')
+        
+        student = get_object_or_404(StudentProfile, id=student_id)
+        subject = get_object_or_404(Subject, id=subject_id)
+        
+        theory_max = request.POST.get('theory_max', 100)
+        theory_min = request.POST.get('theory_min', 35)
+        theory_marks = request.POST.get('theory_marks', 0)
+        
+        practical_max = request.POST.get('practical_max', 50)
+        practical_min = request.POST.get('practical_min', 15)
+        practical_marks = request.POST.get('practical_marks', 0)
+        
+        internal_marks = request.POST.get('internal_marks', 0)
+        
+        # Calculate totals
+        total_marks = int(theory_marks) + int(practical_marks) + int(internal_marks)
+        total_max = int(theory_max) + int(practical_max) + 50 # Assuming internal max is 50
+        percentage = (total_marks / total_max) * 100 if total_max > 0 else 0
+        
+        result_status = request.POST.get('result_status', 'Fail')
+        
+        # Check if exists to update
+        res, created = Subject

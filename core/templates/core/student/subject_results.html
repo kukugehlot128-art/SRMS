@@ -1,0 +1,155 @@
+{% extends 'core/student/base.html' %}
+
+{% block title %}My Subject Results{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>My Subject Results</h2>
+    <p style="color: var(--text-light); margin-top: 5px;">Detailed marks for all subjects</p>
+</div>
+
+<!-- Overall Statistics -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+    <div class="card" style="border-top: 4px solid #10B981;">
+        <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #10B981; margin-bottom: 5px;">{{ total_results }}</div>
+            <div style="color: var(--text-light); font-size: 0.9rem;">Total Subjects</div>
+        </div>
+    </div>
+    
+    <div class="card" style="border-top: 4px solid #3B82F6;">
+        <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #3B82F6; margin-bottom: 5px;">{{ passed_results }}</div>
+            <div style="color: var(--text-light); font-size: 0.9rem;">Passed</div>
+        </div>
+    </div>
+    
+    <div class="card" style="border-top: 4px solid #F59E0B;">
+        <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #F59E0B; margin-bottom: 5px;">{{ backlog_results }}</div>
+            <div style="color: var(--text-light); font-size: 0.9rem;">Backlog</div>
+        </div>
+    </div>
+    
+    <div class="card" style="border-top: 4px solid #EF4444;">
+        <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #EF4444; margin-bottom: 5px;">{{ failed_results }}</div>
+            <div style="color: var(--text-light); font-size: 0.9rem;">Failed</div>
+        </div>
+    </div>
+    
+    <div class="card" style="border-top: 4px solid #8B5CF6;">
+        <div style="text-align: center;">
+            <div style="font-size: 2rem; font-weight: bold; color: #8B5CF6; margin-bottom: 5px;">{{ overall_percentage }}%</div>
+            <div style="color: var(--text-light); font-size: 0.9rem;">Overall Percentage</div>
+        </div>
+    </div>
+</div>
+
+<!-- Subject Results Table -->
+<div class="card">
+    <h3 style="margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #E5E7EB;">Subject-wise Performance</h3>
+    
+    {% if subject_results %}
+    <div style="overflow-x: auto;">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Theory</th>
+                    <th>Practical</th>
+                    <th>Internal</th>
+                    <th>Total</th>
+                    <th>Percentage</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in subject_results %}
+                <tr>
+                    <td>
+                        <div style="font-weight: 500;">{{ result.subject.name }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">{{ result.subject.code }}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500;">{{ result.theory_marks }}/{{ result.theory_max }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">Min: {{ result.theory_min }}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500;">{{ result.practical_marks }}/{{ result.practical_max }}</div>
+                        <div style="font-size: 0.8rem; color: var(--text-light);">Min: {{ result.practical_min }}</div>
+                    </td>
+                    <td style="font-weight: 500;">{{ result.internal_marks }}</td>
+                    <td style="font-weight: 600;">{{ result.total_marks }}</td>
+                    <td style="font-weight: 600;">{{ result.percentage }}%</td>
+                    <td>
+                        <span class="result-badge result-{{ result.result_status|lower }}">
+                            {{ result.result_status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px; color: var(--text-light);">
+        <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+        <div>No subject results available yet.</div>
+        <div style="font-size: 0.9rem; margin-top: 5px;">Results will appear here once entered by faculty.</div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.result-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+}
+
+.result-pass {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.result-fail {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.result-backlog {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.admin-table th {
+    background: #F9FAFB;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-table tr:hover {
+    background: #F9FAFB;
+}
+</style>
+{% endblock %}

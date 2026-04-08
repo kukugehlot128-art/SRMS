@@ -1,0 +1,49 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admit Card Search - EduResult{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 3rem auto;">
+    <div style="text-align: center; margin-bottom: 2.5rem;">
+        <div style="background: rgba(79, 70, 229, 0.1); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+            <i class="fas fa-address-card" style="font-size: 2.5rem; color: var(--primary);"></i>
+        </div>
+        <h1 style="font-size: 2.5rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;">Download Admit Card</h1>
+        <p style="color: var(--text-light); font-size: 1.1rem;">Enter your details to retrieve your examination admit card.</p>
+    </div>
+
+    <div style="background: white; border-radius: 16px; padding: 2.5rem; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e5e7eb;">
+        <form method="POST" action="{% url 'core:admit_card_search' %}">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.75rem;">Roll Number</label>
+                <div style="position: relative;">
+                    <i class="fas fa-id-badge" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 1.2rem;"></i>
+                    <input type="text" name="roll_number" required style="width: 100%; padding: 1rem 1rem 1rem 3.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1.1rem; transition: all 0.2s; outline: none;" placeholder="Enter Roll Number" onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 3px rgba(79, 70, 229, 0.2)'" onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.75rem;">Enrollment Number</label>
+                <div style="position: relative;">
+                    <i class="fas fa-hashtag" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 1.2rem;"></i>
+                    <input type="text" name="enrollment_number" style="width: 100%; padding: 1rem 1rem 1rem 3.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1.1rem; transition: all 0.2s; outline: none;" placeholder="Enter Enrollment Number" onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 3px rgba(79, 70, 229, 0.2)'" onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 2.5rem;">
+                <label style="display: block; font-weight: 600; color: #374151; margin-bottom: 0.75rem;">Date of Birth</label>
+                <div style="position: relative;">
+                    <i class="fas fa-calendar-alt" style="position: absolute; left: 1.25rem; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 1.2rem;"></i>
+                    <input type="date" name="dob" style="width: 100%; padding: 1rem 1rem 1rem 3.5rem; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 1.1rem; transition: all 0.2s; outline: none;" onfocus="this.style.borderColor='var(--primary)'; this.style.boxShadow='0 0 0 3px rgba(79, 70, 229, 0.2)'" onblur="this.style.borderColor='#e5e7eb'; this.style.boxShadow='none'">
+                </div>
+            </div>
+            
+            <button type="submit" style="width: 100%; padding: 1rem; background-color: var(--primary); color: white; border: none; border-radius: 8px; font-size: 1.15rem; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);" onmouseover="this.style.transform='translateY(-2px)'; this.style.backgroundColor='var(--primary-dark)'" onmouseout="this.style.transform='translateY(0)'; this.style.backgroundColor='var(--primary)'">
+                Generate Admit Card <i class="fas fa-download" style="margin-left: 0.5rem;"></i>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Events - EduResult{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2.5rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">Events</h1>
+    <p style="color: var(--text-light); font-size: 1.1rem;">Stay updated with the latest happenings.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 1.5rem;">
+    {% if events %}
+        {% for event in events %}
+        <div style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); overflow: hidden; display: flex;">
+            <div style="background: #f9fafb; padding: 2rem 1.5rem; text-align: center; border-right: 1px solid #e5e7eb; min-width: 120px; display: flex; flex-direction: column; justify-content: center;">
+                <span style="display: block; font-size: 2rem; font-weight: 700; color: var(--secondary); line-height: 1;">{{ event.event_date|date:"d" }}</span>
+                <span style="display: block; font-size: 1rem; font-weight: 600; color: #6b7280; text-transform: uppercase;">{{ event.event_date|date:"M Y" }}</span>
+            </div>
+            <div style="padding: 1.5rem; flex: 1;">
+                <h3 style="font-size: 1.35rem; font-weight: 600; color: var(--text-main); margin-bottom: 0.5rem;">{{ event.title }}</h3>
+                <p style="color: var(--text-light); line-height: 1.6; margin-bottom: 1rem;">{{ event.description }}</p>
+                {% if event.venue %}
+                <p style="color: #EC4899; font-size: 0.85rem; font-weight: 600;"><i class="fas fa-map-marker-alt"></i> {{ event.venue }}</p>
+                {% endif %}
+            </div>
+            {% if event.image %}
+            <div style="padding: 1.5rem; display: flex; align-items: center; justify-content: center; border-left: 1px solid #e5e7eb; background: #fafafa; cursor: pointer; transition: background 0.2s;" onmouseover="this.style.background='#f3f4f6';" onmouseout="this.style.background='#fafafa';" onclick="showImage('{{ event.image.url }}')">
+                <img src="{{ event.image.url }}" alt="{{ event.title }}" style="max-width: 180px; max-height: 180px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 25px rgba(0,0,0,0.1);" loading="lazy">
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="padding: 3rem; text-align: center; background: white; border-radius: 12px; border: 1px solid #e5e7eb;">
+            <i class="fas fa-calendar-times" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 1.25rem; color: var(--text-main);">No upcoming events</h3>
+            <p style="color: var(--text-light);">Watch this space for future announcements.</p>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Image View Modal -->
+<div id="imageModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(4px);" onclick="this.style.display='none'">
+    <div style="position: absolute; top: 20px; right: 30px; color: white; font-size: 2rem; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background: rgba(255,255,255,0.2)">&times;</div>
+    <img id="modalImage" src="" style="max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+</div>
+
+<script>
+function showImage(url) {
+    document.getElementById('modalImage').src = url;
+    document.getElementById('imageModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,213 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Dynamic Result Entry{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Dynamic Result Entry</h2>
+    <a href="{% url 'core:manage_results' %}" class="btn" style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Results
+    </a>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <form method="POST" id="dynamicResultForm">
+        {% csrf_token %}
+        <div class="section-title" style="margin-bottom: 20px; font-weight: 600; color: var(--primary); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+            <i class="fas fa-filter"></i> Filters & Selection
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="form-group">
+                <label>Course *</label>
+                <select id="course_dropdown" name="course_id" class="form-control" required onchange="fetchSemesters(this.value)">
+                    <option value="">-- Select Course --</option>
+                    {% for course in courses %}
+                    <option value="{{ course.id }}">{{ course.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Semester *</label>
+                <select id="semester_dropdown" name="semester_id" class="form-control" required disabled onchange="fetchSubjects(this.value); fetchStudents(document.getElementById('course_dropdown').value, this.value);">
+                    <option value="">-- Select Course First --</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Subject *</label>
+                <select id="subject_dropdown" name="subject_id" class="form-control" required disabled>
+                    <option value="">-- Select Semester First --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Student *</label>
+                <select id="student_dropdown" name="student_id" class="form-control" required disabled>
+                    <option value="">-- Select Course & Semester First --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="section-title" style="margin-bottom: 20px; font-weight: 600; color: var(--primary); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+            <i class="fas fa-star-half-alt"></i> Marks Entry
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;">
+            <h4 style="grid-column: 1 / -1; margin: 0 0 10px 0; color: #334155; font-size: 0.95rem;">Theory Marks</h4>
+            <div class="form-group">
+                <label>Max Marks</label>
+                <input type="number" id="theory_max" name="theory_max" class="form-control" value="80" required onchange="calculateResult()">
+            </div>
+            <div class="form-group">
+                <label>Min Marks</label>
+                <input type="number" id="theory_min" name="theory_min" class="form-control" value="32" required onchange="calculateResult()">
+            </div>
+            <div class="form-group">
+                <label>Obtained *</label>
+                <input type="number" id="theory_marks" name="theory_marks" class="form-control" value="0" required oninput="calculateResult()">
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;">
+            <h4 style="grid-column: 1 / -1; margin: 0 0 10px 0; color: #334155; font-size: 0.95rem;">Practical Marks</h4>
+            <div class="form-group">
+                <label>Max Marks</label>
+                <input type="number" id="practical_max" name="practical_max" class="form-control" value="30" required onchange="calculateResult()">
+            </div>
+            <div class="form-group">
+                <label>Min Marks</label>
+                <input type="number" id="practical_min" name="practical_min" class="form-control" value="15" required onchange="calculateResult()">
+            </div>
+            <div class="form-group">
+                <label>Obtained *</label>
+                <input type="number" id="practical_marks" name="practical_marks" class="form-control" value="0" required oninput="calculateResult()">
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="form-group" style="background: #f8fafc; padding: 15px; border-radius: 8px;">
+                <h4 style="margin: 0 0 10px 0; color: #334155; font-size: 0.95rem;">Internal Marks</h4>
+                <label>Obtained *</label>
+                <input type="number" id="internal_marks" name="internal_marks" class="form-control" value="0" required oninput="calculateResult()">
+            </div>
+            
+            <div class="form-group" style="padding: 15px;">
+                <label>Percentage (%)</label>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="percentage_display" class="form-control" value="0.00" readonly style="background: #e2e8f0; font-weight: 600;">
+                </div>
+            </div>
+            
+            <div class="form-group" style="padding: 15px;">
+                <label>Result Status</label>
+                <select id="result_status" name="result_status" class="form-control" style="font-weight: 600;">
+                    <option value="Pass">Pass</option>
+                    <option value="Fail">Fail</option>
+                    <option value="Backlog">Backlog</option>
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn" style="width: 100%; justify-content: center; background: #4F46E5; font-size: 1.1rem; padding: 12px;">
+            <i class="fas fa-save"></i> Save Dynamic Result
+        </button>
+    </form>
+</div>
+
+<script>
+    function fetchSemesters(courseId) {
+        const semDropdown = document.getElementById('semester_dropdown');
+        if (!courseId) {
+            semDropdown.innerHTML = '<option value="">-- Select Course First --</option>';
+            semDropdown.disabled = true;
+            return;
+        }
+        
+        fetch(`/admin/ajax/get-semesters/?course_id=${courseId}`)
+            .then(response => response.json())
+            .then(data => {
+                semDropdown.innerHTML = '<option value="">-- Select Semester --</option>';
+                data.forEach(sem => {
+                    semDropdown.innerHTML += `<option value="${sem.id}">${sem.name}</option>`;
+                });
+                semDropdown.disabled = false;
+            });
+    }
+
+    function fetchSubjects(semesterId) {
+        const subjDropdown = document.getElementById('subject_dropdown');
+        if (!semesterId) {
+            subjDropdown.innerHTML = '<option value="">-- Select Semester First --</option>';
+            subjDropdown.disabled = true;
+            return;
+        }
+        
+        fetch(`/admin/ajax/get-subjects/?semester_id=${semesterId}`)
+            .then(response => response.json())
+            .then(data => {
+                subjDropdown.innerHTML = '<option value="">-- Select Subject --</option>';
+                data.forEach(subj => {
+                    subjDropdown.innerHTML += `<option value="${subj.id}">${subj.name} (${subj.code})</option>`;
+                });
+                subjDropdown.disabled = false;
+            });
+    }
+
+    function fetchStudents(courseId, semesterId) {
+        const studentDropdown = document.getElementById('student_dropdown');
+        if (!courseId || !semesterId) {
+            studentDropdown.innerHTML = '<option value="">-- Select Course & Semester First --</option>';
+            studentDropdown.disabled = true;
+            return;
+        }
+        
+        fetch(`/admin/ajax/get-students/?course_id=${courseId}&semester_id=${semesterId}`)
+            .then(response => response.json())
+            .then(data => {
+                studentDropdown.innerHTML = '<option value="">-- Select Student --</option>';
+                data.forEach(student => {
+                    studentDropdown.innerHTML += `<option value="${student.id}">${student.name}</option>`;
+                });
+                studentDropdown.disabled = false;
+            });
+    }
+
+    function calculateResult() {
+        const tMax = parseFloat(document.getElementById('theory_max').value) || 0;
+        const tMin = parseFloat(document.getElementById('theory_min').value) || 0;
+        const tObt = parseFloat(document.getElementById('theory_marks').value) || 0;
+        
+        const pMax = parseFloat(document.getElementById('practical_max').value) || 0;
+        const pMin = parseFloat(document.getElementById('practical_min').value) || 0;
+        const pObt = parseFloat(document.getElementById('practical_marks').value) || 0;
+        
+        const iObt = parseFloat(document.getElementById('internal_marks').value) || 0;
+        
+        const totalObt = tObt + pObt + iObt;
+        const totalMax = tMax + pMax + 50; // Approximating internal max as 50
+        
+        let perc = 0;
+        if (totalMax > 0) {
+            perc = (totalObt / totalMax) * 100;
+        }
+        
+        document.getElementById('percentage_display').value = perc.toFixed(2) + '%';
+        
+        const statusDropdown = document.getElementById('result_status');
+        if (tObt < tMin || pObt < pMin) {
+            if (tObt >= tMin && pObt < pMin) {
+                statusDropdown.value = 'Backlog';
+                statusDropdown.style.color = '#ca8a04';
+            } else {
+                statusDropdown.value = 'Fail';
+                statusDropdown.style.color = '#dc2626';
+            }
+        } else {
+            statusDropdown.value = 'Pass';
+            statusDropdown.style.color = '#16a34a';
+        }
+    }
+</script>
+{% endblock %}

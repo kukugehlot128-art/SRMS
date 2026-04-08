@@ -1,0 +1,23 @@
+class SubjectResult(models.Model):
+    STATUS_CHOICES = [('Pass', 'Pass'), ('Fail', 'Fail'), ('Backlog', 'Backlog')]
+
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='subject_results')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='subject_results')
+    
+    # Theory Marks
+    theory_max = models.IntegerField(default=100)
+    theory_min = models.IntegerField(default=35)
+    theory_marks = models.IntegerField(default=0)
+    
+    # Practical Marks
+    practical_max = models.IntegerField(default=50)
+    practical_min = models.IntegerField(default=15)
+    practical_marks = models.IntegerField(default=0)
+    
+    # Internal Marks
+    internal_marks = models.IntegerField(default=0)
+    
+    # Calculated
+    total_marks = models.IntegerField(default=0)
+    percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    result_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Pass')

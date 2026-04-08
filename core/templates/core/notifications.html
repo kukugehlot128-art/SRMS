@@ -1,0 +1,35 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Notifications - EduResult{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+    <h1 style="font-size: 2.5rem; font-weight: 700; color: var(--primary-dark); margin-bottom: 0.5rem;">All Notifications</h1>
+    <p style="color: var(--text-light); font-size: 1.1rem;">Important updates and announcements.</p>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 1rem;">
+    {% if notifications %}
+        {% for notification in notifications %}
+        <div style="background: white; border-radius: 12px; border: 1px solid #e5e7eb; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); padding: 1.5rem; display: flex; align-items: flex-start; gap: 1.5rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+            <div style="background: #e0e7ff; color: var(--primary); width: 50px; height: 50px; border-radius: 50%; display: flex; flex-shrink: 0; justify-content: center; align-items: center; font-size: 1.25rem;">
+                <i class="fas fa-bell"></i>
+            </div>
+            <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 600; color: var(--text-main); margin: 0;">{{ notification.title }}</h3>
+                    <span style="color: #6b7280; font-size: 0.85rem; font-weight: 500; background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 6px;">{{ notification.created_at|date:"M d, Y" }}</span>
+                </div>
+                <p style="color: var(--text-light); line-height: 1.6; margin: 0;">{{ notification.message }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div style="padding: 3rem; text-align: center; background: white; border-radius: 12px; border: 1px solid #e5e7eb;">
+            <i class="fas fa-bell-slash" style="font-size: 3rem; color: #d1d5db; margin-bottom: 1rem;"></i>
+            <h3 style="font-size: 1.25rem; color: var(--text-main);">No notifications</h3>
+            <p style="color: var(--text-light);">You're all caught up! Check back later for updates.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'core/student/base.html' %}
+
+{% block title %}Attendance Report{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2 class="page-title" style="margin-bottom: 0;">Attendance Report</h2>
+
+    <form method="GET" style="display: flex; gap: 10px;">
+        <select name="subject" style="padding: 8px; border-radius: 5px; border: 1px solid #E5E7EB;">
+            <option value="">All Subjects</option>
+            {% for subj in subjects %}
+            <option value="{{ subj.id }}" {% if filter_subj == subj.id|stringformat:"s" %}selected{% endif %}>{{ subj.name
+                }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit"
+            style="background: var(--primary); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">Filter</button>
+    </form>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+    {% for item in att_data %}
+    <div class="card">
+        <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--text-main);">{{ item.subject.name }}</h3>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-size: 0.9rem;">
+            <div style="text-align: center;">
+                <span style="display: block; font-size: 1.5rem; font-weight: bold; color: var(--primary);">{{ item.total
+                    }}</span>
+                <span style="color: var(--text-light);">Total</span>
+            </div>
+            <div style="text-align: center;">
+                <span style="display: block; font-size: 1.5rem; font-weight: bold; color: #10B981;">{{ item.present
+                    }}</span>
+                <span style="color: var(--text-light);">Present</span>
+            </div>
+            <div style="text-align: center;">
+                <span style="display: block; font-size: 1.5rem; font-weight: bold; color: #EF4444;">{{ item.absent
+                    }}</span>
+                <span style="color: var(--text-light);">Absent</span>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 5px;">
+                <span>Eligibility: 75%</span>
+                <span
+                    style="font-weight: bold; color: {% if item.percentage >= 75 %}#10B981{% else %}#EF4444{% endif %};">{{
+                    item.percentage }}%</span>
+            </div>
+            <div style="height: 10px; background: #E5E7EB; border-radius: 5px; overflow: hidden;">
+                <div
+                    style="height: 100%; width: {{ item.percentage }}%; background: {% if item.percentage >= 75 %}#10B981{% elif item.percentage >= 60 %}#F59E0B{% else %}#EF4444{% endif %};">
+                </div>
+            </div>
+        </div>
+
+        <details>
+            <summary
+                style="cursor: pointer; padding: 10px; background: #F3F4F6; border-radius: 5px; font-size: 0.9rem; font-weight: 500;">
+                View Date-wise Details</summary>
+            <div
+                style="max-height: 200px; overflow-y: auto; margin-top: 10px; border: 1px solid #E5E7EB; border-radius: 5px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                    {% for rec in item.records %}
+                    <tr style="border-bottom: 1px solid #E5E7EB;">
+                        <td style="padding: 8px 10px;">{{ rec.date|date:"M d, Y" }}</td>
+                        <td style="padding: 8px 10px; text-align: right;">
+                            {% if rec.status == 'present' %}
+                            <span style="color: #10B981; font-weight: bold;"><i class="fas fa-check-circle"></i>
+                                Present</span>
+                            {% else %}
+                            <span style="color: #EF4444; font-weight: bold;"><i class="fas fa-times-circle"></i>
+                                Absent</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" style="padding: 10px; text-align: center; color: var(--text-light);">No
+                            attendance records found.</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </details>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

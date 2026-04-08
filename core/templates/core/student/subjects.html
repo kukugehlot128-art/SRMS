@@ -1,0 +1,50 @@
+{% extends 'core/student/base.html' %}
+
+{% block title %}My Subjects{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Enrolled Subjects</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    {% for subject in subjects %}
+    <div class="card" style="border-top: 4px solid {% cycle '#4F46E5' '#EC4899' '#8B5CF6' '#10B981' %};">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+            <div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 5px;">{{ subject.name }}</h3>
+                <span
+                    style="background: #F3F4F6; padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-family: monospace;">{{
+                    subject.code }}</span>
+            </div>
+            <div
+                style="background: rgba(79, 70, 229, 0.1); color: var(--primary); padding: 5px; border-radius: 5px; font-weight: bold; width: 40px; text-align: center;">
+                {{ subject.credits }}<br><span style="font-size: 0.6rem; font-weight: normal;">CR</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px; border-top: 1px dashed #E5E7EB; padding-top: 15px;">
+            <p style="font-size: 0.9rem; color: var(--text-light); margin-bottom: 8px;">
+                <i class="fas fa-chalkboard-teacher" style="width: 20px;"></i>
+                {{ subject.professor.get_full_name|default:"Not Assigned" }}
+            </p>
+            <p style="font-size: 0.9rem; color: var(--text-light);">
+                <i class="far fa-calendar-alt" style="width: 20px;"></i>
+                Semester {{ subject.semester.name }}
+            </p>
+        </div>
+
+        <div style="margin-top: 15px; display: flex; gap: 10px;">
+            <a href="{% url 'core:student_attendance' %}?subject={{ subject.id }}"
+                style="flex: 1; text-align: center; background: #F3F4F6; padding: 8px; border-radius: 5px; text-decoration: none; color: var(--text-main); font-size: 0.9rem; transition: background 0.2s;">
+                <i class="fas fa-clipboard-check"></i> Attendance
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+        <i class="fas fa-book text-light" style="font-size: 3rem; color: #E5E7EB; margin-bottom: 15px;"></i>
+        <h3>No Subjects Found</h3>
+        <p style="color: var(--text-light);">You are not enrolled in any subjects at the moment.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

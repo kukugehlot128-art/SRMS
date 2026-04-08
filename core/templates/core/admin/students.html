@@ -1,0 +1,98 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Manage Students{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Student Directory</h2>
+    <div style="display: flex; gap: 10px;">
+        <form method="GET" style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" name="q" placeholder="Search by name, roll no, email..." class="form-control" style="width: 250px;" value="{{ query|default_if_none:'' }}">
+            <button type="submit" class="btn" style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;"><i class="fas fa-search"></i> Search</button>
+        </form>
+        <a href="{% url 'core:create_student' %}" class="btn"><i class="fas fa-plus"></i> Add Student</a>
+    </div>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Student Info</th>
+                <th>Roll Number</th>
+                <th>Program/Course</th>
+                <th>Profile Photo</th>
+                <th>Admission Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+
+
+            <tr>
+                <td>
+                    <div style="font-weight: 500; color: var(--text-main);">{{ student.user.get_full_name }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px;">
+                        <i class="far fa-envelope"></i> {{ student.user.email|default:"No email" }}
+                    </div>
+                </td>
+                <td><span
+                        style="background: rgba(79, 70, 229, 0.1); color: var(--secondary); padding: 4px 10px; border-radius: 6px; font-weight: 600; font-family: monospace;">
+                        {{student.roll_number}}</span></td>
+                <td>
+                    <span style="font-weight: 500;">{{ student.course.code|default:"Unassigned" }}</span><br>
+                    <span style="font-size: 0.8rem; color: var(--text-light);">Stream {{ student.semester.name }}</span>
+                </td>
+                <td>
+                    {% if student.user.profile_photo %}
+                    <a href="{{ student.user.profile_photo.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                        📷 View Photo
+                    </a>
+                    {% else %}
+                    <span style="color: var(--text-light); font-size: 0.8rem;">No photo</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-light); font-size: 0.9rem;">
+                    {{ student.admission_date|date:"M d, Y" }}
+                </td>
+                <td>
+                    {% if student.user.is_active %}
+                    <span
+                        style="background: #D1FAE5; color: #065F46; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Active</span>
+                    {% else %}
+                    <span
+                        style="background: #FEE2E2; color: #991B1B; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'core:student_detail' student.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: var(--secondary); color: white;"
+                            title="View Details"><i class="fas fa-eye"></i></a>
+                        <a href="{% url 'core:update_student' student.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #4F46E5; color: white;"><i
+                                class="fas fa-edit"></i></a>
+                        <a href="{% url 'core:delete_student' student.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i
+                                class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-users-slash" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    No students found in the system.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+    <span style="color: var(--text-light); font-size: 0.9rem;">Showing {{ students.count }} student(s)</span>
+</div>
+{% endblock %}

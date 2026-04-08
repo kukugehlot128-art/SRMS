@@ -1,0 +1,72 @@
+{% extends 'core/professor/base.html' %}
+{% block title %}Results{% endblock %}
+{% block page_title %}Results{% endblock %}
+{% block nav_results %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Results</h2>
+        <p>View and enter student results</p>
+    </div>
+    <a href="{% url 'core:professor_results_list' %}" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Back to Exams
+    </a>
+</div>
+
+<div class="card">
+    {% if results %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Exam</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Remarks</th>
+                    <th>Published</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in results %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        <div style="font-weight:600">{{ r.student.user.get_full_name }}</div>
+                        <div style="font-size:12px;color:var(--text-muted)">{{ r.student.roll_number }}</div>
+                    </td>
+                    <td>{{ r.exam.name }}</td>
+                    <td><span class="badge badge-purple">{{ r.exam.subject.code }}</span></td>
+                    <td>
+                        <strong style="font-size:16px">{{ r.marks_obtained }}</strong>
+                        <span style="color:var(--text-muted);font-size:12px"> / {{ r.exam.total_marks }}</span>
+                    </td>
+                    <td>
+                        {% if r.grade == 'F' %}
+                        <span class="badge badge-danger">{{ r.grade }}</span>
+                        {% elif r.grade == 'O' or r.grade == 'A+' %}
+                        <span class="badge badge-success">{{ r.grade }}</span>
+                        {% else %}
+                        <span class="badge badge-warning">{{ r.grade }}</span>
+                        {% endif %}
+                    </td>
+                    <td style="color:var(--text-muted)">{{ r.remarks|default:"—"|truncatewords:6 }}</td>
+                    <td style="color:var(--text-muted)">{{ r.published_at|date:"d M Y" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-chart-bar"></i>
+        <p>No results published yet.</p>
+        <a href="{% url 'core:professor_results_list' %}" class="btn btn-primary" style="margin-top:16px">
+            <i class="fas fa-arrow-left"></i> View Exams
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,417 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}CodeCraft College – Student Result Management System{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #3730a3;
+            --secondary: #0ea5e9; /* Soft academic blue */
+            --bg-main: #ffffff; /* Clean white background */
+            --bg-secondary: #f8fafc; /* Very subtle grey for sections */
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --header-bg: #ffffff;
+            --panel-width: 300px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Sticky, clean white navbar */
+        .navbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            position: relative;
+            padding: 0.5rem 0;
+            transition: color 0.3s;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .nav-btn {
+            background-color: var(--primary);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #f1f5f9;
+            color: var(--text-light);
+            text-align: center;
+            padding: 2rem;
+            margin-top: auto;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        /* Button styles */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #059669;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .alert-error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #f87171;
+        }
+
+        .alert-success {
+            background-color: #d1fae5;
+            color: #047857;
+            border: 1px solid #34d399;
+        }
+
+        /* Side Panel Styles */
+        .side-panel-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .side-panel-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .side-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            height: 100vh;
+            width: var(--panel-width);
+            background: white;
+            z-index: 1050;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            transition: right 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .side-panel.active {
+            right: 0;
+        }
+
+        .panel-header {
+            padding: 1.5rem;
+            background: var(--header-bg);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .panel-close:hover {
+            color: var(--primary-light);
+        }
+
+        .panel-body {
+            padding: 2rem 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .login-card {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .login-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-light);
+        }
+
+        .login-card i {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+
+        .login-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <nav class="navbar">
+        <a href="{% url 'core:home' %}" class="navbar-brand"
+            style="flex-direction: column; align-items: flex-start; gap: 0;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-university" style="color: var(--primary-light);"></i> <span>CodeCraft College</span>
+            </div>
+            <span
+                style="font-size: 0.85rem; font-weight: 500; color: rgba(255,255,255,0.8); margin-left: 34px; letter-spacing: 0.5px;">कोडकाफ्ट
+                महाविद्यालय</span>
+        </a>
+        <div class="nav-links">
+            <a href="{% url 'core:home' %}" class="nav-link">Home</a>
+            <a href="{% url 'core:courses' %}" class="nav-link">Courses</a>
+            <a href="{% url 'core:events' %}" class="nav-link">Events</a>
+            <a href="{% url 'core:notifications' %}" class="nav-link">Notifications</a>
+            <a href="{% url 'core:exam' %}" class="nav-link">Timetable</a>
+            <a href="{% url 'core:result_search' %}" class="nav-link">Exam Results</a>
+            <a href="{% url 'core:about' %}" class="nav-link">About Us</a>
+            <a href="{% url 'core:admission' %}" class="nav-link">Admission</a>
+
+            {% if request.user.is_authenticated %}
+                <!-- Dashboard link removed from here as requested -->
+            <a href="{% url 'core:logout' %}" class="nav-btn" style="background: rgba(239, 68, 68, 0.9);">Logout</a>
+            {% else %}
+            <button onclick="toggleSidePanel()" class="nav-btn"
+                style="border: none; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+                <i class="fas fa-sign-in-alt"></i> Login Portal
+            </button>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Side Panel Overlay -->
+    <div class="side-panel-overlay" id="sidePanelOverlay" onclick="toggleSidePanel()"></div>
+
+    <!-- Side Panel -->
+    <div class="side-panel" id="sidePanel">
+        <div class="panel-header">
+            <h2 style="font-size: 1.25rem; font-weight: 600; margin: 0;"><i class="fas fa-user-circle"></i> User Login
+            </h2>
+            <button class="panel-close" onclick="toggleSidePanel()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="panel-body">
+            <a href="{% url 'core:student_login' %}" class="login-card">
+                <i class="fas fa-user-graduate"></i>
+                <h3>Student Login</h3>
+            </a>
+            <a href="{% url 'core:professor_login' %}" class="login-card">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <h3>Professor Login</h3>
+            </a>
+            <a href="{% url 'core:admin_login' %}" class="login-card">
+                <i class="fas fa-user-shield"></i>
+                <h3>Admin Login</h3>
+            </a>
+        </div>
+    </div>
+
+    <main class="main-content">
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+        <div
+            style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h3 style="color: white; font-size: 1.2rem; margin-bottom: 0.5rem;"><i class="fas fa-university"
+                        style="margin-right: 5px;"></i> CodeCraft College</h3>
+                <p style="margin-bottom: 0.5rem; color: #d1d5db; font-size: 0.95rem;">Empowering Future Tech Leaders |
+                    <span style="font-weight: 500;">कोडक्राफ्ट महाविद्यालय</span></p>
+                <p style="margin-bottom: 0; color: #9ca3af; font-size: 0.85rem;">&copy; 2026 CodeCraft College. All
+                    rights reserved.</p>
+            </div>
+            <div style="text-align: right;">
+                <h4 style="color: white; margin-bottom: 0.5rem; font-size: 1rem;">Contact Us</h4>
+                <p style="margin-bottom: 0.25rem; font-size: 0.9rem;"><i class="fas fa-envelope"
+                        style="margin-right: 5px; color: var(--primary-light);"></i> info@codecraft.edu</p>
+                <p style="margin-bottom: 0.5rem; font-size: 0.9rem;"><i class="fas fa-phone-alt"
+                        style="margin-right: 5px; color: var(--primary-light);"></i> +91 98765 43210</p>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 0.75rem;">
+                    <a href="#" style="color: #9ca3af; transition: color 0.3s; font-size: 1.1rem;"
+                        onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#9ca3af'"><i
+                            class="fab fa-facebook-f"></i></a>
+                    <a href="#" style="color: #9ca3af; transition: color 0.3s; font-size: 1.1rem;"
+                        onmouseover="this.style.color='#38bdf8'" onmouseout="this.style.color='#9ca3af'"><i
+                            class="fab fa-twitter"></i></a>
+                    <a href="#" style="color: #9ca3af; transition: color 0.3s; font-size: 1.1rem;"
+                        onmouseover="this.style.color='#f472b6'" onmouseout="this.style.color='#9ca3af'"><i
+                            class="fab fa-instagram"></i></a>
+                    <a href="#" style="color: #9ca3af; transition: color 0.3s; font-size: 1.1rem;"
+                        onmouseover="this.style.color='#60a5fa'" onmouseout="this.style.color='#9ca3af'"><i
+                            class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleSidePanel() {
+            const panel = document.getElementById('sidePanel');
+            const overlay = document.getElementById('sidePanelOverlay');
+            panel.classList.toggle('active');
+            overlay.classList.toggle('active');
+
+            if (panel.classList.contains('active')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

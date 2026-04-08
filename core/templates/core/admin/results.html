@@ -1,0 +1,91 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Manage Results{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Student Results Management</h2>
+    <div style="display: flex; gap: 10px;">
+        <a href="{% url 'core:create_result' %}" class="btn" style="background: #4F46E5;">
+            <i class="fas fa-plus"></i> Add New Result (Dynamic)
+        </a>
+        <a href="{% url 'core:manage_subject_results' %}" class="btn" style="background: #10B981;">
+            <i class="fas fa-list"></i> Subject-wise Results
+        </a>
+    </div>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div
+        style="padding: 15px 20px; background: #F9FAFB; border-bottom: 1px solid #E5E7EB; display: flex; gap: 10px; align-items: center;">
+        <i class="fas fa-filter" style="color: var(--text-light);"></i>
+        <select class="form-control" style="width: 200px; padding: 6px 12px; height: auto;">
+            <option value="">Filter by Course...</option>
+            <option value="BCA">BCA</option>
+            <option value="MCA">MCA</option>
+            <option value="MBA">MBA</option>
+        </select>
+        <input type="text" placeholder="Search student roll no..." class="form-control"
+            style="width: 200px; padding: 6px 12px; height: auto;">
+        <button class="btn" style="padding: 6px 15px;"><i class="fas fa-search"></i></button>
+    </div>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                <th>Exam & Course</th>
+                <th>Total Marks</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>
+                    <div style="font-weight: 500; color: var(--text-main);">{{ result.student_name }}
+                    </div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px; font-family: monospace;">
+                        {{ result.roll_number }}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 500;">{{ result.exam_name }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px;">{{ result.get_course_display }}</div>
+                </td>
+                <td>
+                    <span style="font-weight: 600; font-size: 1.1rem; color: var(--text-main);">{{ result.total_marks }}</span>
+                </td>
+                <td>
+                    {% if result.status == 'FAIL' %}
+                    <span style="color: #EF4444; font-weight: 600; font-size: 0.85rem;"><i
+                            class="fas fa-times-circle"></i> Fail</span>
+                    {% else %}
+                    <span style="color: #10B981; font-weight: 600; font-size: 0.85rem;"><i
+                            class="fas fa-check-circle"></i> Pass</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'core:update_result' result.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #4F46E5; color: white;"><i
+                                class="fas fa-edit"></i></a>
+                        <a href="{% url 'core:delete_result' result.id %}" class="btn"
+                            style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i
+                                class="fas fa-trash"></i></a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-clipboard-check"
+                        style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+                    No academic results have been published yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

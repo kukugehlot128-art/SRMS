@@ -1,0 +1,194 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Subject Results Management{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Subject-wise Results Management</h2>
+    <div style="display: flex; gap: 10px;">
+        <a href="{% url 'core:dynamic_result_form' %}" class="btn" style="background: #4F46E5;">
+            <i class="fas fa-plus"></i> Enter New Result
+        </a>
+        <a href="{% url 'core:manage_results' %}" class="btn" style="background: #10B981;">
+            <i class="fas fa-list"></i> Overall Results
+        </a>
+    </div>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 15px 20px; background: #F9FAFB; border-bottom: 1px solid #E5E7EB;">
+        <form method="GET" style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+            <i class="fas fa-filter" style="color: var(--text-light);"></i>
+            
+            <select name="course" class="form-control" style="width: 150px; padding: 6px 12px; height: auto;" onchange="this.form.submit()">
+                <option value="">All Courses</option>
+                {% for course in courses %}
+                <option value="{{ course.id }}" {% if selected_course == course.id|stringformat:"s" %}selected{% endif %}>{{ course.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="semester" class="form-control" style="width: 150px; padding: 6px 12px; height: auto;" onchange="this.form.submit()">
+                <option value="">All Semesters</option>
+                {% for semester in semesters %}
+                <option value="{{ semester.id }}" {% if selected_semester == semester.id|stringformat:"s" %}selected{% endif %}>{{ semester.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="subject" class="form-control" style="width: 180px; padding: 6px 12px; height: auto;" onchange="this.form.submit()">
+                <option value="">All Subjects</option>
+                {% for subject in subjects %}
+                <option value="{{ subject.id }}" {% if selected_subject == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.name }}</option>
+                {% endfor %}
+            </select>
+            
+            <select name="status" class="form-control" style="width: 120px; padding: 6px 12px; height: auto;" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="Pass" {% if selected_status == "Pass" %}selected{% endif %}>Pass</option>
+                <option value="Fail" {% if selected_status == "Fail" %}selected{% endif %}>Fail</option>
+                <option value="Backlog" {% if selected_status == "Backlog" %}selected{% endif %}>Backlog</option>
+            </select>
+            
+            <a href="{% url 'core:manage_subject_results' %}" class="btn" style="padding: 6px 15px; background: #6B7280;">Clear Filters</a>
+        </form>
+    </div>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Student Details</th>
+                <th>Subject</th>
+                <th>Theory Marks</th>
+                <th>Practical Marks</th>
+                <th>Internal</th>
+                <th>Total</th>
+                <th>Percentage</th>
+                <th>Result</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in subject_results %}
+            <tr>
+                <td>
+                    <div style="font-weight: 500; color: var(--text-main);">{{ result.student.user.get_full_name }}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px;">
+                        Roll: {{ result.student.roll_number }} | {{ result.student.semester.name }}
+                    </div>
+                </td>
+                <td>
+                    <div style="font-weight: 500;">{{ result.subject.name }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-light);">{{ result.subject.code }}</div>
+                </td>
+                <td>
+                    <div>{{ result.theory_marks }}/{{ result.theory_max }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-light);">Min: {{ result.theory_min }}</div>
+                </td>
+                <td>
+                    <div>{{ result.practical_marks }}/{{ result.practical_max }}</div>
+                    <div style="font-size: 0.8rem; color: var(--text-light);">Min: {{ result.practical_min }}</div>
+                </td>
+                <td>{{ result.internal_marks }}</td>
+                <td style="font-weight: 600;">{{ result.total_marks }}</td>
+                <td style="font-weight: 600;">{{ result.percentage }}%</td>
+                <td>
+                    <span class="status-badge status-{{ result.result_status|lower }}">
+                        {{ result.result_status }}
+                    </span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn-icon" title="Edit Result" onclick="editResult({{ result.id }})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-icon btn-danger" title="Delete Result" onclick="deleteResult({{ result.id }})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                    <div>No subject results found. <a href="{% url 'core:dynamic_result_form' %}">Enter first result</a></div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pass {
+    background: #D1FAE5;
+    color: #065F46;
+}
+
+.status-fail {
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+.status-backlog {
+    background: #FEF3C7;
+    color: #92400E;
+}
+
+.btn-icon {
+    padding: 6px 8px;
+    border: 1px solid #D1D5DB;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6B7280;
+    font-size: 0.9rem;
+}
+
+.btn-icon:hover {
+    background: #F9FAFB;
+    color: #374151;
+}
+
+.btn-danger {
+    color: #DC2626;
+    border-color: #FCA5A5;
+}
+
+.btn-danger:hover {
+    background: #FEF2F2;
+    color: #B91C1C;
+}
+</style>
+
+<script>
+function editResult(resultId) {
+    // For now, redirect to dynamic form - could be enhanced to pre-fill
+    window.location.href = '{% url "core:dynamic_result_form" %}';
+}
+
+function deleteResult(resultId) {
+    if (confirm('Are you sure you want to delete this result?')) {
+        // Create a form to submit delete request
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/subject-results/${resultId}/delete/`;
+        
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            form.appendChild(csrfToken.cloneNode(true));
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

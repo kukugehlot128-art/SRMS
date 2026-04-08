@@ -1,0 +1,88 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}{% if is_update %}Update{% else %}Publish{% endif %} Result{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>{% if is_update %}Update Student Result{% else %}Publish Exam Result{% endif %}</h2>
+    <a href="{% url 'core:manage_results' %}" class="btn"
+        style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Results
+    </a>
+</div>
+
+<div class="card" style="max-width: 700px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Student Name *</label>
+                <input type="text" name="student_name" class="form-control" placeholder="e.g. John Doe" required
+                    value="{{ result.student_name|default:'' }}">
+            </div>
+
+            <div class="form-group">
+                <label>Roll Number *</label>
+                <input type="text" name="roll_number" class="form-control" placeholder="e.g. CS2023001" required
+                    value="{{ result.roll_number|default:'' }}">
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Course *</label>
+                <select name="course" class="form-control" required>
+                    <option value="">-- Select Course --</option>
+                    <option value="BCA" {% if result.course == 'BCA' %}selected{% endif %}>BCA</option>
+                    <option value="MCA" {% if result.course == 'MCA' %}selected{% endif %}>MCA</option>
+                    <option value="MBA" {% if result.course == 'MBA' %}selected{% endif %}>MBA</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Exam Name *</label>
+                <select name="exam_name" class="form-control" required>
+                    <option value="">-- Select Exam --</option>
+                    <option value="SEP 2025 Special Exam" {% if result.exam_name == 'SEP 2025 Special Exam' %}selected{% endif %}>SEP 2025 Special Exam</option>
+                    <option value="APR 2025 Regular Exam" {% if result.exam_name == 'APR 2025 Regular Exam' %}selected{% endif %}>APR 2025 Regular Exam</option>
+                    <option value="DEC 2024 Arrear Exam" {% if result.exam_name == 'DEC 2024 Arrear Exam' %}selected{% endif %}>DEC 2024 Arrear Exam</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Subject-wise Marks *</label>
+            <p style="font-size: 0.8rem; color: #6B7280; margin-bottom: 5px;">Format: "Subject Name: Marks" (One per line)</p>
+            <textarea name="subject_marks" class="form-control" rows="5" required
+                placeholder="Database Management: 85&#10;Data Structures: 88&#10;Software Engineering: 90">{{ result.subject_marks|default:'' }}</textarea>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Total Marks (Grand Total) *</label>
+                <input type="number" name="total_marks" class="form-control" required
+                    value="{{ result.total_marks|default:'0' }}" min="0">
+            </div>
+
+            <div class="form-group">
+                <label>Overall Status *</label>
+                <select name="status" class="form-control" required>
+                    <option value="PASS" {% if result.status == 'PASS' %}selected{% endif %}>PASS</option>
+                    <option value="FAIL" {% if result.status == 'FAIL' %}selected{% endif %}>FAIL</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Study Centre Code (Optional)</label>
+            <input type="text" name="centre_code" class="form-control" placeholder="e.g. 1045"
+                value="{{ result.centre_code|default:'' }}">
+        </div>
+
+        <button type="submit" class="btn"
+            style="width: 100%; justify-content: center; margin-top: 15px; background: #10B981;">
+            <i class="fas fa-save"></i> {% if is_update %}Save Changes{% else %}Publish Result{% endif %}
+        </button>
+    </form>
+</div>
+{% endblock %}

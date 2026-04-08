@@ -1,0 +1,53 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Events & Gallery{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Academic Events & Gallery</h2>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    {% for event in events %}
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        {% if event.image %}
+        <div style="height: 200px; width: 100%; overflow: hidden;">
+            <img src="{{ event.image.url }}" alt="{{ event.title }}"
+                style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;">
+        </div>
+        {% else %}
+        <div
+            style="height: 200px; width: 100%; background: #F3F4F6; display: flex; align-items: center; justify-content: center; color: var(--text-light);">
+            <i class="fas fa-image" style="font-size: 3rem; opacity: 0.5;"></i>
+        </div>
+        {% endif %}
+
+        <div style="padding: 20px; flex: 1; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                <h3 style="color: var(--text-main); margin: 0; font-size: 1.2rem;">{{ event.title }}</h3>
+            </div>
+
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 15px; flex: 1;">
+                {{ event.description|truncatewords:20 }}
+            </p>
+
+            <div
+                style="border-top: 1px solid #E5E7EB; padding-top: 15px; font-size: 0.85rem; color: #6B7280; display: flex; flex-direction: column; gap: 5px;">
+                <div><i class="fas fa-calendar-day" style="width: 20px; color: var(--primary);"></i> {{
+                    event.event_date|date:"F d, Y" }}</div>
+                {% if event.venue %}
+                <div><i class="fas fa-map-marker-alt" style="width: 20px; color: var(--secondary);"></i> {{ event.venue
+                    }}</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 60px; color: var(--text-light);">
+        <i class="far fa-calendar-times" style="font-size: 4rem; margin-bottom: 20px; opacity: 0.3;"></i>
+        <h3>No Events Scheduled</h3>
+        <p>There are no upcoming or past events in the gallery right now.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

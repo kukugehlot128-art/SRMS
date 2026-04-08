@@ -1,0 +1,116 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Admit Card - {{ student.roll_number }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto 3rem auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-main);">Hall Ticket Details</h2>
+        <button onclick="window.print()" style="padding: 0.5rem 1rem; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem;">
+            <i class="fas fa-print"></i> Print Admit Card
+        </button>
+    </div>
+
+    <div style="background: white; border: 2px solid #1f2937; padding: 3rem; margin-bottom: 2rem; position: relative;">
+        <!-- Header -->
+        <div style="text-align: center; border-bottom: 2px solid #e5e7eb; padding-bottom: 1.5rem; margin-bottom: 2rem;">
+            <h1 style="font-size: 2rem; font-weight: 800; color: #111827; text-transform: uppercase; letter-spacing: 1px;">EduResult University</h1>
+            <p style="font-size: 1.1rem; color: #4b5563; font-weight: 600; margin-top: 0.5rem;">EXAMINATION ADMIT CARD 2026</p>
+        </div>
+
+        <!-- Student Details -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2.5rem;">
+            <div style="flex: 1;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                        <td style="padding: 0.5rem 0; font-weight: 600; color: #4b5563; width: 140px;">Candidate Name:</td>
+                        <td style="padding: 0.5rem 0; font-weight: 700; color: #111827; font-size: 1.1rem;">{{ student.user.first_name }} {{ student.user.last_name }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.5rem 0; font-weight: 600; color: #4b5563;">Roll Number:</td>
+                        <td style="padding: 0.5rem 0; font-weight: 700; color: #111827;">{{ student.roll_number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.5rem 0; font-weight: 600; color: #4b5563;">Enrollment No:</td>
+                        <td style="padding: 0.5rem 0; font-weight: 700; color: #111827;">{{ student.enrollment_number }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 0.5rem 0; font-weight: 600; color: #4b5563;">Course/Stream:</td>
+                        <td style="padding: 0.5rem 0; font-weight: 700; color: #111827;">{{ student.semester.course.name }} - {{ student.semester.name }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="width: 130px; height: 160px; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; background: #f9fafb; margin-left: 2rem;">
+                <i class="fas fa-user" style="font-size: 4rem; color: #d1d5db;"></i>
+            </div>
+        </div>
+
+        <!-- Exam Schedule -->
+        <div style="margin-bottom: 2.5rem;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin-bottom: 1rem; border-bottom: 2px solid #111827; padding-bottom: 0.5rem; display: inline-block;">Examination Schedule</h3>
+            
+            <table style="width: 100%; border-collapse: collapse; text-align: left; border: 1px solid #d1d5db;">
+                <thead>
+                    <tr style="background: #f3f4f6;">
+                        <th style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; font-weight: 600; color: #374151;">Date</th>
+                        <th style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; font-weight: 600; color: #374151;">Time</th>
+                        <th style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; font-weight: 600; color: #374151;">Subject Code</th>
+                        <th style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; font-weight: 600; color: #374151;">Subject Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for exam in exams %}
+                    <tr>
+                        <td style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; color: #111827; font-weight: 500;">{{ exam.date|date:"d M Y" }}</td>
+                        <td style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; color: #111827;">{{ exam.start_time|time:"h:i A" }} - {{ exam.end_time|time:"h:i A" }}</td>
+                        <td style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; color: #111827; font-weight: 500;">{{ exam.subject.code }}</td>
+                        <td style="padding: 0.75rem 1rem; border: 1px solid #d1d5db; color: #111827;">{{ exam.subject.name }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding: 1.5rem; border: 1px solid #d1d5db; text-align: center; color: #6b7280;">No exams scheduled for this semester.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Instructions -->
+        <div style="margin-bottom: 3rem;">
+            <h4 style="font-weight: 700; color: #111827; margin-bottom: 0.5rem;">Important Instructions:</h4>
+            <ul style="color: #4b5563; font-size: 0.9rem; padding-left: 1.5rem; line-height: 1.6;">
+                <li>Candidates must print this admit card and bring it to the examination center.</li>
+                <li>Candidates must also carry a valid University Identity Card.</li>
+                <li>Electronic devices and mobile phones are strictly prohibited in the examination hall.</li>
+                <li>Candidates must reach the examination center at least 30 minutes before the scheduled time.</li>
+            </ul>
+        </div>
+
+        <!-- Signatures -->
+        <div style="display: flex; justify-content: space-between; margin-top: 4rem;">
+            <div style="text-align: center; width: 200px;">
+                <div style="border-bottom: 1px solid #111827; height: 30px; margin-bottom: 0.5rem;"></div>
+                <p style="font-size: 0.9rem; font-weight: 600; color: #374151;">Candidate Signature</p>
+            </div>
+            <div style="text-align: center; width: 200px;">
+                <div style="border-bottom: 1px solid #111827; height: 30px; margin-bottom: 0.5rem; position: relative;">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Signature_of_Controller.png" alt="" style="position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); height: 40px; opacity: 0.7; mix-blend-mode: multiply;">
+                </div>
+                <p style="font-size: 0.9rem; font-weight: 600; color: #374151;">Controller of Examinations</p>
+            </div>
+        </div>
+        
+    </div>
+</div>
+
+<style>
+    @media print {
+        body > *:not(.main-content) { display: none; }
+        .main-content { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+        button { display: none !important; }
+        nav, footer, .navbar { display: none !important; }
+        @page { size: portrait; margin: 1cm; }
+    }
+</style>
+{% endblock %}

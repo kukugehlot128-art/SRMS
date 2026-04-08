@@ -1,0 +1,353 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}{% if is_update %}Update{% else %}Create{% endif %} Exam{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --dark-bg: #ffffff;
+        --darker-bg: #f8fafc;
+        --dark-border: #cbd5e1;
+        --dark-text: #0f172a;
+        --muted-text: #64748b;
+        --btn-bg: #334155;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+    }
+
+    .admit-card-container {
+        background-color: var(--dark-bg);
+        color: var(--dark-text);
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        border: 1px solid var(--dark-border);
+        border-radius: 8px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .ac-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--dark-border);
+        padding-bottom: 20px;
+    }
+
+    .ac-header h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin: 0 0 5px 0;
+        color: var(--dark-text);
+    }
+
+    .ac-header p {
+        font-size: 0.85rem;
+        color: var(--muted-text);
+        margin: 0;
+    }
+
+    .ac-section-title {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted-text);
+        font-weight: 600;
+        margin: 25px 0 15px 0;
+    }
+
+    .ac-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .ac-grid-full {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ac-form-group label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--muted-text);
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .ac-input {
+        background-color: #ffffff;
+        border: 1px solid var(--dark-border);
+        border-radius: 4px;
+        padding: 10px 12px;
+        color: var(--dark-text);
+        font-size: 0.95rem;
+        width: 100%;
+    }
+
+    .ac-input:focus {
+        outline: none;
+        border-color: var(--dark-border);
+    }
+    
+    select.ac-input option {
+        background-color: #ffffff;
+        color: var(--dark-text);
+    }
+
+    .ac-table-container {
+        border: 1px solid var(--dark-border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    .ac-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .ac-table th {
+        background-color: var(--darker-bg);
+        padding: 12px 15px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--muted-text);
+        font-weight: 600;
+        border-bottom: 1px solid var(--dark-border);
+    }
+
+    .ac-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--dark-border);
+    }
+
+    .ac-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ac-btn {
+        background-color: var(--btn-bg);
+        color: white;
+        border: 1px solid var(--btn-bg);
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        display: block;
+        width: 100%;
+        text-decoration: none;
+    }
+
+    .ac-remove-btn {
+        background: transparent;
+        color: #ef4444;
+        border: 1px solid #fca5a5;
+        background-color: #fef2f2;
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* Override admin base styles where necessary */
+    .content-area {
+        background-color: #f1f5f9 !important; /* Light clean outer background */
+    }
+</style>
+
+<div class="admit-card-container">
+    <div class="ac-header">
+        <h2>CODECRAFT COLLEGE (ADMIN EXAM PANEL)</h2>
+        <p>Examination Scheduling & Timetable Form</p>
+    </div>
+
+    <form method="POST" id="examForm">
+        {% csrf_token %}
+        
+        <div class="ac-section-title">THEORY EXAM TIMETABLE</div>
+
+
+        
+        <div class="ac-table-container">
+            <table class="ac-table" id="examTable">
+                <thead>
+                    <tr>
+                        <th style="width: 25%">DATE & TIME</th>
+                        <th style="width: 15%">EXAM TYPE</th>
+                        <th style="width: 25%">SUBJECT</th>
+                        <th style="width: 15%">ROOM</th>
+                        <th style="width: 10%">MARKS</th>
+                        <th style="width: 10%; text-align: center;">ACTION</th>
+                    </tr>
+                </thead>
+                <tbody id="examTableBody">
+                    {% if is_update %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                                <input type="date" name="date[]" class="ac-input" required value="{{ exam.date|date:'Y-m-d' }}" style="padding: 6px;">
+                            </div>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <input type="time" name="start_time[]" class="ac-input" required value="{{ exam.start_time|time:'H:i' }}" style="padding: 6px;"> 
+                                <span style="color: var(--muted-text); font-size: 0.8rem;">to</span>
+                                <input type="time" name="end_time[]" class="ac-input" required value="{{ exam.end_time|time:'H:i' }}" style="padding: 6px;">
+                            </div>
+                        </td>
+                        <td>
+                            <select name="exam_type_id[]" class="ac-input" required style="padding: 6px;">
+                                <option value="">Select Type</option>
+                                {% for et in exam_types %}
+                                <option value="{{ et.id }}" {% if exam.exam_type_id == et.id %}selected{% endif %}>{{ et.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select name="subject_id[]" class="ac-input subject-select" required style="padding: 6px;">
+                                <option value="">Select Subject</option>
+                                {% for sub in subjects %}
+                                <option value="{{ sub.id }}" data-stream-id="{{ sub.semester_id }}" {% if exam.subject_id == sub.id %}selected{% endif %}>{{ sub.name }} ({{sub.code}})</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" name="room[]" class="ac-input" placeholder="Hall 1" required value="{{ exam.room }}" style="padding: 6px;">
+                        </td>
+                        <td>
+                            <input type="number" name="total_marks[]" class="ac-input" placeholder="100" required value="{{ exam.total_marks }}" style="padding: 6px;">
+                        </td>
+                        <td style="text-align: center;">
+                            <button type="button" class="ac-remove-btn" onclick="removeRow(this)"><i class="fas fa-times"></i></button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                                <input type="date" name="date[]" class="ac-input" required style="padding: 6px;">
+                            </div>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <input type="time" name="start_time[]" class="ac-input" required style="padding: 6px;"> 
+                                <span style="color: var(--muted-text); font-size: 0.8rem;">to</span>
+                                <input type="time" name="end_time[]" class="ac-input" required style="padding: 6px;">
+                            </div>
+                        </td>
+                        <td>
+                            <select name="exam_type_id[]" class="ac-input" required style="padding: 6px;">
+                                <option value="">Select Type</option>
+                                {% for et in exam_types %}
+                                <option value="{{ et.id }}">{{ et.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select name="subject_id[]" class="ac-input subject-select" required style="padding: 6px;">
+                                <option value="">Select Subject</option>
+                                {% for sub in subjects %}
+                                <option value="{{ sub.id }}" data-stream-id="{{ sub.semester_id }}">{{ sub.name }} ({{sub.code}})</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="text" name="room[]" class="ac-input" placeholder="Hall 1" required style="padding: 6px;">
+                        </td>
+                        <td>
+                            <input type="number" name="total_marks[]" class="ac-input" value="100" required style="padding: 6px;">
+                        </td>
+                        <td style="text-align: center;">
+                            <button type="button" class="ac-remove-btn" onclick="removeRow(this)"><i class="fas fa-times"></i></button>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if not is_update %}
+        <button type="button" class="ac-btn" style="background: transparent; margin-bottom: 15px;" onclick="addRow()">
+            + Add Exam Row
+        </button>
+        {% endif %}
+
+        <button type="submit" class="ac-btn">
+            {% if is_update %}Update Timetable{% else %}Save Timetable{% endif %}
+        </button>
+    </form>
+</div>
+
+<!-- Template for new row -->
+<template id="rowTemplate">
+    <tr>
+        <td>
+            <div style="display: flex; gap: 5px; margin-bottom: 5px;">
+                <input type="date" name="date[]" class="ac-input" required style="padding: 6px;">
+            </div>
+            <div style="display: flex; gap: 5px; align-items: center;">
+                <input type="time" name="start_time[]" class="ac-input" required style="padding: 6px;"> 
+                <span style="color: var(--muted-text); font-size: 0.8rem;">to</span>
+                <input type="time" name="end_time[]" class="ac-input" required style="padding: 6px;">
+            </div>
+        </td>
+        <td>
+                            <select name="exam_type_id[]" class="ac-input" required style="padding: 6px;">
+                                <option value="">Select Type</option>
+                                {% for et in exam_types %}
+                                <option value="{{ et.id }}">{{ et.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <select name="subject_id[]" class="ac-input subject-select" required style="padding: 6px;">
+                                <option value="">Select Subject</option>
+                                {% for sub in subjects %}
+                                <option value="{{ sub.id }}" data-stream-id="{{ sub.semester_id }}">{{ sub.name }} ({{sub.code}})</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+        <td>
+            <input type="text" name="room[]" class="ac-input" placeholder="Hall 1" required style="padding: 6px;">
+        </td>
+        <td>
+            <input type="number" name="total_marks[]" class="ac-input" value="100" required style="padding: 6px;">
+        </td>
+        <td style="text-align: center;">
+            <button type="button" class="ac-remove-btn" onclick="removeRow(this)"><i class="fas fa-times"></i></button>
+        </td>
+    </tr>
+</template>
+
+<script>
+
+
+    function addRow() {
+        const tbody = document.getElementById('examTableBody');
+        const template = document.getElementById('rowTemplate');
+        const clone = template.content.cloneNode(true);
+        tbody.appendChild(clone);
+    }
+
+    function removeRow(btn) {
+        const row = btn.closest('tr');
+        const tbody = document.getElementById('examTableBody');
+        // Prevent removing the last row
+        if (tbody.children.length > 1) {
+            row.remove();
+        } else {
+            alert("Cannot remove the last exam row.");
+        }
+    }
+</script>
+{% endblock %}

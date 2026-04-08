@@ -1,0 +1,57 @@
+{% if students %}
+<div
+    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #E5E7EB;">
+    <h3 style="font-size: 1.1rem; color: var(--text-main);">Student List</h3>
+    <div>
+        <button type="button" onclick="markAll('present')"
+            style="background: #10B981; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem; margin-right: 5px;">Mark
+            All Present</button>
+        <button type="button" onclick="markAll('absent')"
+            style="background: #EF4444; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">Mark
+            All Absent</button>
+    </div>
+</div>
+
+<table style="width: 100%; border-collapse: collapse;">
+    <thead>
+        <tr style="background: #F9FAFB;">
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #E5E7EB;">Roll Number</th>
+            <th style="padding: 12px; text-align: left; border-bottom: 1px solid #E5E7EB;">Name</th>
+            <th style="padding: 12px; text-align: center; border-bottom: 1px solid #E5E7EB;">Attendance Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+        <tr style="border-bottom: 1px solid #F3F4F6; transition: background 0.2s;">
+            <td style="padding: 12px; font-weight: 500;">{{ student.roll_number }}</td>
+            <td style="padding: 12px;">{{ student.user.get_full_name }}</td>
+            <td style="padding: 12px; text-align: center;">
+                <div
+                    style="display: inline-flex; background: #F3F4F6; border-radius: 20px; overflow: hidden; padding: 2px;">
+                    <label style="padding: 5px 15px; cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                        <input type="radio" name="status_{{ student.id }}" value="present" required checked>
+                        <span style="color: #10B981; font-weight: 500;">Present</span>
+                    </label>
+                    <label
+                        style="padding: 5px 15px; cursor: pointer; display: flex; align-items: center; gap: 5px; border-left: 1px solid #E5E7EB;">
+                        <input type="radio" name="status_{{ student.id }}" value="absent" required>
+                        <span style="color: #EF4444; font-weight: 500;">Absent</span>
+                    </label>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div style="margin-top: 20px; text-align: right;">
+    <button type="submit"
+        style="background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 5px; font-size: 1.1rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(236, 72, 153, 0.2);">
+        Save Attendance Records
+    </button>
+</div>
+{% else %}
+<div style="text-align: center; padding: 30px; color: var(--text-light); background: #FEE2E2; border-radius: 8px;">
+    <p>No students enrolled in this subject yet.</p>
+</div>
+{% endif %}

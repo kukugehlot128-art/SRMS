@@ -1,0 +1,122 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Manage Events{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Campus Events & Gallery Management</h2>
+    <button onclick="document.getElementById('addModal').style.display='flex'" class="btn" style="background: #EC4899;">
+        <i class="fas fa-calendar-plus"></i> New Event
+    </button>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 20px;">
+    {% for event in events %}
+    <div class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+        {% if event.image %}
+        <div style="height: 180px; background: url('{{ event.image.url }}') center/cover; position: relative;">
+            <div
+                style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;">
+                {{ event.event_date|date:"M d, Y" }}
+            </div>
+        </div>
+        {% else %}
+        <div
+            style="height: 180px; background: linear-gradient(135deg, #EC4899, #8B5CF6); display: flex; align-items: center; justify-content: center; position: relative;">
+            <i class="fas fa-images" style="font-size: 3rem; color: white; opacity: 0.5;"></i>
+            <div
+                style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.5); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem;">
+                {{ event.event_date|date:"M d, Y" }}
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="padding: 20px; flex: 1;">
+            <h3 style="color: var(--text-main); font-size: 1.2rem; margin-bottom: 5px;">{{ event.title }}</h3>
+            <p style="color: #EC4899; font-size: 0.85rem; margin-bottom: 15px;"><i class="fas fa-map-marker-alt"></i> {{ event.venue|default:"Venue TBA" }}</p>
+
+            <p style="color: var(--text-light); font-size: 0.9rem; line-height: 1.5; margin-bottom: 15px;">
+                {{ event.description|truncatewords:20 }}
+            </p>
+
+            <div
+                style="border-top: 1px solid #E5E7EB; padding-top: 15px; margin-top: auto; display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-light);">
+                <span>Posted by: {{ event.created_by.username }}</span>
+                <span>{{ event.created_at|date:"M d" }}</span>
+            </div>
+        </div>
+
+        <div style="display: flex; border-top: 1px solid #E5E7EB;">
+            <a href="{% url 'core:update_event' event.id %}" class="btn"
+                style="flex: 1; border-radius: 0; background: #F3F4F6; color: var(--text-main); justify-content: center; font-size: 0.9rem;">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'core:delete_event' event.id %}" class="btn"
+                style="flex: 1; border-radius: 0; background: #FEE2E2; color: #EF4444; justify-content: center; font-size: 0.9rem;">
+                <i class="fas fa-trash-alt"></i> Delete
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 60px;">
+        <i class="far fa-calendar-alt" style="font-size: 3rem; color: #E5E7EB; margin-bottom: 15px;"></i>
+        <h3>No Events Planned</h3>
+        <p style="color: var(--text-light);">Use the button above to schedule the first campus event.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Event Modal -->
+<div id="addModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
+    <div class="card" style="width: 100%; max-width: 600px; padding: 30px;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
+            <h3 style="color: var(--text-main);">Create Event</h3>
+            <button type="button" onclick="document.getElementById('addModal').style.display='none'"
+                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Event Title</label>
+                <input type="text" name="title" class="form-control" required
+                    placeholder="e.g. Annual Tech Symposium 2024">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Date</label>
+                    <input type="date" name="event_date" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Venue / Location</label>
+                    <input type="text" name="venue" class="form-control" placeholder="e.g. Main Auditorium">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Description (Details/Schedule)</label>
+                <textarea name="description" class="form-control" rows="4" required
+                    placeholder="Provide full details about the event..."></textarea>
+            </div>
+
+            <div class="form-group"
+                style="background: #F9FAFB; padding: 15px; border: 1px dashed #D1D5DB; border-radius: 8px;">
+                <label style="color: var(--secondary);"><i class="fas fa-cloud-upload-alt"></i> Event Banner Image
+                    (Optional)</label>
+                <input type="file" name="image" class="form-control" accept="image/*"
+                    style="border: none; background: transparent; padding: 5px 0;">
+                <small style="color: var(--text-light); display: block;">Recommended ratio 16:9. Formats: JPG, PNG,
+                    WEBP</small>
+            </div>
+
+            <button type="submit" class="btn"
+                style="width: 100%; justify-content: center; margin-top: 15px; background: #EC4899;">
+                <i class="fas fa-bullhorn"></i> Publish Event
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

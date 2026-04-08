@@ -1,0 +1,32 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Confirm Deletion{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 600px; margin: 50px auto; text-align: center; padding: 40px;">
+    <div
+        style="background: rgba(220, 38, 38, 0.1); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: #DC2626;"></i>
+    </div>
+
+    <h2 style="color: var(--text-main); margin-bottom: 15px;">Are you sure?</h2>
+
+    <p style="color: var(--text-light); margin-bottom: 30px; font-size: 1.1rem;">
+        You are about to permanently delete "<strong>{{ obj }}</strong>". This action cannot be undone and may affect
+        related records in the database.
+    </p>
+
+    <form method="POST">
+        {% csrf_token %}
+        <div style="display: flex; gap: 15px; justify-content: center;">
+            <a href="{% url cancel_url %}" class="btn"
+                style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+            <button type="submit" class="btn" style="background: #DC2626; color: white; border: none;">
+                <i class="fas fa-trash-alt"></i> Yes, Delete It
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Professor: {{ professor.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Faculty Profile</h2>
+    <a href="{% url 'core:manage_professors' %}" class="btn"
+        style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Directory
+    </a>
+</div>
+
+<div class="card" style="max-width: 900px;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 15px;">
+        <div style="display: flex; gap: 20px; align-items: center;">
+            <div style="width: 80px; height: 80px; background: var(--primary-light); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: bold;">
+                {{ professor.user.first_name|first|upper }}{{ professor.user.last_name|first|upper }}
+            </div>
+            <div>
+                <h3 style="margin: 0; font-size: 1.5rem; color: var(--text-main);">Prof. {{ professor.user.get_full_name }}</h3>
+                <p style="margin: 5px 0 0; color: var(--text-light);"><i class="fas fa-building"></i> Department of {{ professor.department|default:"Unassigned" }}</p>
+                <p style="margin: 5px 0 0; color: var(--text-light);"><i class="fas fa-envelope"></i> {{ professor.user.email }}</p>
+            </div>
+        </div>
+        <a href="{% url 'core:update_professor' professor.id %}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Profile
+        </a>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+        <!-- Left Column -->
+        <div>
+            <h4 style="color: var(--secondary); margin-bottom: 15px;"><i class="fas fa-info-circle"></i> Contact Info</h4>
+            <table style="width: 100%; border: none;">
+                <tr><td style="padding: 8px 0; color: var(--text-light); width: 120px;">Email</td><td style="font-weight: 500;">{{ professor.user.email }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Phone</td><td style="font-weight: 500;">{{ professor.user.phone|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Address</td><td style="font-weight: 500;">{{ professor.address|default:"N/A" }}</td></tr>
+            </table>
+
+            <h4 style="color: var(--secondary); margin: 25px 0 15px;"><i class="fas fa-users"></i> Family Details</h4>
+            <table style="width: 100%; border: none;">
+                <tr><td style="padding: 8px 0; color: var(--text-light); width: 120px;">Father's Name</td><td style="font-weight: 500;">{{ professor.father_name|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Mother's Name</td><td style="font-weight: 500;">{{ professor.mother_name|default:"N/A" }}</td></tr>
+            </table>
+        </div>
+
+        <!-- Right Column -->
+        <div>
+            <h4 style="color: var(--secondary); margin-bottom: 15px;"><i class="fas fa-briefcase"></i> Professional Details</h4>
+            <table style="width: 100%; border: none;">
+                <tr><td style="padding: 8px 0; color: var(--text-light); width: 120px;">Department</td><td style="font-weight: 500;">{{ professor.department|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Date of Joining</td><td style="font-weight: 500;">{{ professor.date_of_joining|date:"M d, Y"|default:"N/A" }}</td></tr>
+                <tr><td style="padding: 8px 0; color: var(--text-light);">Passing Year</td><td style="font-weight: 500;">{{ professor.passing_year|default:"N/A" }}</td></tr>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

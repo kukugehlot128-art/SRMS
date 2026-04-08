@@ -1,0 +1,43 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}My Subjects{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Assigned Subjects</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+    {% for subject in subjects %}
+    <div class="card" style="border-left: 4px solid var(--primary);">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+            <div>
+                <h3 style="font-size: 1.2rem; margin-bottom: 5px; color: var(--text-main);">{{ subject.name }}</h3>
+                <span
+                    style="background: var(--bg-color); color: var(--primary); padding: 3px 8px; border-radius: 4px; font-size: 0.8rem; font-family: monospace;">{{ subject.code }}</span>
+            </div>
+            <div
+                style="background: #F3F4F6; padding: 5px; border-radius: 5px; font-weight: bold; width: 40px; text-align: center;">
+                {{ subject.credits }}<br><span
+                    style="font-size: 0.6rem; font-weight: normal; color: var(--text-light);">CR</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px dashed #E5E7EB;">
+            <p style="font-size: 0.9rem; color: var(--text-main); margin-bottom: 5px;">
+                <i class="fas fa-graduation-cap" style="width: 20px; color: var(--text-light);"></i>
+                Course: {{ subject.semester.course.name }}
+            </p>
+            <p style="font-size: 0.9rem; color: var(--text-main);">
+                <i class="far fa-calendar-alt" style="width: 20px; color: var(--text-light);"></i>
+                Semester: {{ subject.semester.name }}
+            </p>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 40px;">
+        <i class="fas fa-book-open text-light" style="font-size: 3rem; color: #E5E7EB; margin-bottom: 15px;"></i>
+        <h3>No Subjects Assigned</h3>
+        <p style="color: var(--text-light);">You have not been assigned any subjects yet. Contact the administrator.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

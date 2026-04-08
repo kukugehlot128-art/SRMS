@@ -1,0 +1,158 @@
+{% extends 'core/admin/base.html' %}
+
+{% block title %}Manage Timetable{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Timetable Management</h2>
+    <a href="{% url 'core:create_timetable' %}" class="btn" style="background: #4F46E5;">
+        <i class="fas fa-plus"></i> Add Timetable Entry
+    </a>
+</div>
+
+<div class="card" style="padding: 0; overflow: hidden;">
+    <div style="padding: 15px 20px; background: #F9FAFB; border-bottom: 1px solid #E5E7EB; display: flex; gap: 10px; align-items: center;">
+        <i class="fas fa-filter" style="color: var(--text-light);"></i>
+        <select class="form-control" style="width: 200px; padding: 6px 12px; height: auto;" onchange="filterByCourse(this.value)">
+            <option value="">All Courses</option>
+            {% for course in courses %}
+            <option value="{{ course }}">{{ course }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Course</th>
+                <th>Subject</th>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Duration</th>
+                <th>Faculty</th>
+                <th>Room</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for tt in timetables %}
+            <tr class="course-row-{{ tt.course_name }}">
+                <td>
+                    <span style="font-weight: 500; color: var(--text-main);">{{ tt.course_name }}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 500;">{{ tt.subject_name }}</span>
+                </td>
+                <td>
+                    <span style="background: #E0E7FF; color: #4F46E5; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 600;">
+                        {{ tt.day }}
+                    </span>
+                </td>
+                <td>
+                    <div style="font-size: 0.9rem;">{{ tt.start_time|time:"H:i" }} - {{ tt.end_time|time:"H:i" }}</div>
+                </td>
+                <td>
+                    <span style="color: var(--text-light);">{{ tt.duration|default:"N/A" }}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 500;">{{ tt.faculty_name }}</span>
+                </td>
+                <td>
+                    <span style="background: #F3F4F6; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">{{ tt.room_number }}</span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 5px;">
+                        <a href="{% url 'core:update_timetable' tt.id %}" class="btn-icon" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form method="POST" action="{% url 'core:delete_timetable' tt.id %}" style="display: inline;" onsubmit="return confirm('Delete this timetable entry?')">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-icon btn-danger" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8" style="text-align: center; padding: 40px; color: var(--text-light);">
+                    <i class="fas fa-calendar-times" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i>
+                    <div>No timetable entries found. <a href="{% url 'core:create_timetable' %}">Create one</a></div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+.btn-icon {
+    padding: 6px 8px;
+    border: 1px solid #D1D5DB;
+    background: white;
+    border-radius: 4px;
+    cursor: pointer;
+    color: #6B7280;
+    font-size: 0.9rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-icon:hover {
+    background: #F9FAFB;
+    color: #374151;
+}
+
+.btn-danger {
+    color: #DC2626;
+    border-color: #FCA5A5;
+}
+
+.btn-danger:hover {
+    background: #FEF2F2;
+    color: #B91C1C;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #E5E7EB;
+}
+
+.admin-table th {
+    background: #F9FAFB;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.admin-table tr:hover {
+    background: #F9FAFB;
+}
+</style>
+
+<script>
+function filterByCourse(course) {
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        if (course === '' || row.classList.contains('course-row-' + course)) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

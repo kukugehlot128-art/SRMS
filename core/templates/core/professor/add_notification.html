@@ -1,0 +1,53 @@
+{% extends 'core/professor/base.html' %}
+{% block title %}Send Notification{% endblock %}
+{% block page_title %}Send Notification{% endblock %}
+{% block nav_notifications %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h2>Send Notification</h2>
+        <p>Broadcast a message to students or colleagues</p>
+    </div>
+    <a href="{% url 'core:professor_notifications' %}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card" style="max-width:640px">
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-group full">
+                <label>Notification Title</label>
+                <input type="text" name="title" placeholder="e.g. Exam Rescheduled to Next Week" required>
+            </div>
+            <div class="form-group">
+                <label>Type</label>
+                <select name="notif_type">
+                    {% for val, label in notif_types %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Target Audience</label>
+                <select name="target_role">
+                    {% for val, label in target_roles %}
+                    <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group full">
+                <label>Message</label>
+                <textarea name="message" placeholder="Write your message here..." required></textarea>
+            </div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:12px">
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-paper-plane"></i> Send Notification
+            </button>
+            <a href="{% url 'core:professor_notifications' %}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'core/student/base.html' %}
+
+{% block title %}Submit Assignment{% endblock %}
+
+{% block content %}
+<div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 25px;">
+    <div>
+        <h2 class="page-title" style="margin-bottom: 5px;">{{ assignment.title }}</h2>
+        <p style="color: var(--text-light);"><i class="fas fa-book"></i> {{ assignment.subject.name }} | <i
+                class="fas fa-bullseye"></i> Max Marks: {{ assignment.max_marks }}</p>
+    </div>
+    <a href="{% url 'core:student_assignments' %}" class="btn"
+        style="background: #E5E7EB; color: var(--text-main); text-decoration: none;">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <!-- Assignment Details Card -->
+    <div class="card">
+        <h3
+            style="color: var(--text-main); margin-bottom: 15px; border-bottom: 2px solid #F3F4F6; padding-bottom: 10px;">
+            Instruction from Professor</h3>
+        <p style="color: var(--text-light); line-height: 1.6; margin-bottom: 20px; white-space: pre-line;">{{
+            assignment.description }}</p>
+
+        <div style="background: #F9FAFB; padding: 15px; border-radius: 8px; border: 1px solid #E5E7EB;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: var(--text-light); font-weight: 500;">Posted on:</span>
+                <span style="color: var(--text-main);">{{ assignment.created_at|date:"M d, Y, h:i A" }}</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+                <span style="color: #EF4444; font-weight: bold;">Due Date:</span>
+                <span style="color: #EF4444; font-weight: bold;">{{ assignment.due_date|date:"M d, Y" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submission Form / Details Card -->
+    <div class="card" style="border-top: 4px solid var(--accent);">
+        {% if is_submitted %}
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div
+                style="width: 60px; height: 60px; background: #D1FAE5; color: #10B981; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 10px;">
+                <i class="fas fa-check"></i>
+            </div>
+            <h3 style="color: #059669; margin: 0;">Submission Successful</h3>
+            <p style="color: var(--text-light); margin-top: 5px;">Submitted on: {{ submission.submitted_at|date:"M d, Y,
+                h:i A" }}</p>
+        </div>
+
+        <div style="background: #F3F4F6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h4 style="margin-bottom: 10px; color: var(--text-main);">Your Submission:</h4>
+            {% if submission.submission_file %}
+            <a href="{{ submission.submission_file.url }}" target="_blank"
+                style="display: inline-block; background: white; padding: 8px 15px; border-radius: 4px; color: var(--accent); text-decoration: none; border: 1px solid #E5E7EB; margin-bottom: 10px;">
+                <i class="fas fa-file-download" style="margin-right: 5px;"></i> {{
+                submission.submission_file.name|slice:"12:" }}
+            </a><br>
+            {% endif %}
+
+            {% if submission.submission_text %}
+            <p
+                style="background: white; padding: 10px; border-radius: 4px; border: 1px solid #E5E7EB; font-size: 0.9rem; color: var(--text-light); white-space: pre-line; margin-top: 10px;">
+                {{ submission.submission_text }}</p>
+            {% endif %}
+        </div>
+
+        <div style="border-top: 2px dashed #E5E7EB; padding-top: 20px;">
+            <h4 style="margin-bottom: 15px; color: var(--text-main);">Grading Status</h4>
+            {% if submission.marks_obtained is not None %}
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <span style="font-size: 1.1rem; color: var(--text-main); font-weight: 500;">Marks Received:</span>
+                <span
+                    style="background: var(--accent); color: white; padding: 5px 15px; border-radius: 20px; font-weight: bold; font-size: 1.2rem;">
+                    {{ submission.marks_obtained }} / {{ assignment.max_marks }}
+                </span>
+            </div>
+            {% if submission.feedback %}
+            <div style="background: #EFF6FF; border-left: 4px solid #3B82F6; padding: 15px; border-radius: 4px;">
+                <span style="display: block; font-weight: bold; color: #1E40AF; margin-bottom: 5px;">Professor's
+                    Feedback:</span>
+                <span style="color: #1D4ED8;">{{ submission.feedback }}</span>
+            </div>
+            {% endif %}
+            {% else %}
+            <div style="background: #FEF3C7; color: #D97706; padding: 15px; border-radius: 8px; text-align: center;">
+                <i class="fas fa-hourglass-half" style="margin-bottom: 5px;"></i><br>
+                Your submission is pending review by the professor.
+            </div>
+            {% endif %}
+        </div>
+
+        {% else %}
+        <h3
+            style="color: var(--text-main); margin-bottom: 15px; border-bottom: 2px solid #F3F4F6; padding-bottom: 10px;">
+            Submit Your Work</h3>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 15px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 5px;">Text Response (Optional)</label>
+                <textarea name="submission_text" rows="5" class="form-control"
+                    placeholder="Type your answer or paste a link here..."
+                    style="width: 100%; border-radius: 4px; border: 1px solid #D1D5DB; padding: 10px;"></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 20px;">
+                <label style="display: block; font-weight: 500; margin-bottom: 5px;">File Upload (Optional)</label>
+                <input type="file" name="submission_file" class="form-control"
+                    style="width: 100%; border-radius: 4px; border: 1px solid #D1D5DB; padding: 8px;">
+                <small style="color: var(--text-light); margin-top: 5px; display: block;">Upload PDF, DOCX, or ZIP
+                    files.</small>
+            </div>
+
+            <button type="submit" class="btn"
+                style="width: 100%; background: var(--accent); color: white; padding: 12px; border: none; border-radius: 6px; font-weight: bold; font-size: 1.1rem; cursor: pointer;">
+                <i class="fas fa-paper-plane" style="margin-right: 5px;"></i> Submit Assignment
+            </button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
