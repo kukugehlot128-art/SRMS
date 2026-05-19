@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.generic import RedirectView
 from . import views
 
 app_name = 'core'
@@ -32,21 +33,36 @@ urlpatterns = [
     path('admin/subjects/<int:pk>/update/', views.update_subject, name='update_subject'),
     path('admin/subjects/<int:pk>/delete/', views.delete_subject, name='delete_subject'),
     path('admin/students/', views.manage_students, name='manage_students'),
+    path('admin/students/django-admin', RedirectView.as_view(pattern_name='admin:index', permanent=False)),
+    path('admin/students/django-admin/', RedirectView.as_view(pattern_name='admin:index', permanent=False)),
     path('admin/students/create/', views.create_student, name='create_student'),
     path('admin/students/<int:pk>/update/', views.update_student, name='update_student'),
     path('admin/students/<int:pk>/detail/', views.student_detail, name='student_detail'),
     path('admin/students/<int:pk>/delete/', views.delete_student, name='delete_student'),
+    
+    # Streams URLs
+    path('admin/streams/', views.manage_streams, name='manage_streams'),
+    path('admin/streams/<int:pk>/update/', views.update_stream, name='update_stream'),
+    path('admin/streams/<int:pk>/delete/', views.delete_stream, name='delete_stream'),
+
+    # Semesters URLs
+    path('admin/semesters/', views.manage_semesters, name='manage_semesters'),
+    path('admin/semesters/<int:pk>/update/', views.update_semester, name='update_semester'),
+    path('admin/semesters/<int:pk>/delete/', views.delete_semester, name='delete_semester'),
+
+    # Professors URLs
     path('admin/professors/', views.manage_professors, name='manage_professors'),
     path('admin/professors/create/', views.create_professor, name='create_professor'),
     path('admin/professors/<int:pk>/update/', views.update_professor, name='update_professor'),
     path('admin/professors/<int:pk>/detail/', views.professor_detail, name='professor_detail'),
     path('admin/professors/<int:pk>/delete/', views.delete_professor, name='delete_professor'),
-    path('admin/streams/', views.manage_streams, name='manage_streams'),
-    path('admin/streams/<int:pk>/update/', views.update_stream, name='update_stream'),
-    path('admin/streams/<int:pk>/delete/', views.delete_stream, name='delete_stream'),
+
+    # Events URLs
     path('admin/events/', views.manage_events, name='manage_events'),
     path('admin/events/<int:pk>/update/', views.update_event, name='update_event'),
     path('admin/events/<int:pk>/delete/', views.delete_event, name='delete_event'),
+
+    # Notifications URLs
     path('admin/notifications/', views.manage_notifications, name='manage_notifications'),
     path('admin/notifications/<int:pk>/update/', views.update_notification, name='update_notification'),
     path('admin/notifications/<int:pk>/delete/', views.delete_notification, name='delete_notification'),
@@ -59,6 +75,8 @@ urlpatterns = [
     path('admin/timetable/', views.manage_timetable, name='manage_timetable'),
     path('admin/timetable/create/', views.create_timetable, name='create_timetable'),
     path('admin/timetable/<int:pk>/update/', views.update_timetable, name='update_timetable'),
+
+
     path('admin/timetable/<int:pk>/delete/', views.delete_timetable, name='delete_timetable'),
     path('admin/results/', views.manage_subject_results, name='manage_results'),
     path('admin/results/create/', views.create_result, name='create_result'),
@@ -67,6 +85,7 @@ urlpatterns = [
 
     # Subject Results Management
     path('admin/subject-results/', views.manage_subject_results, name='manage_subject_results'),
+    path('admin/api/subject-results/', views.api_subject_results, name='api_subject_results'),
     path('admin/subject-results/<int:pk>/delete/', views.delete_subject_result, name='delete_subject_result'),
     path('admin/assignments/', views.manage_assignments, name='manage_assignments'),
     path('admin/assignments/create/', views.create_assignment, name='create_assignment'),
@@ -79,18 +98,23 @@ urlpatterns = [
     path('admin/allotment/enroll/', views.enroll_student, name='enroll_student'),
 
     # AJAX URLs
+    path('admin/ajax/get-streams/', views.ajax_get_streams, name='ajax_get_streams'),
     path('admin/ajax/get-semesters/', views.ajax_get_semesters, name='ajax_get_semesters'),
     path('admin/ajax/get-subjects/', views.ajax_get_subjects, name='ajax_get_subjects'),
     path('admin/ajax/get-students/', views.ajax_get_students, name='ajax_get_students'),
+    path('admin/ajax/get-student-results/', views.ajax_get_student_results, name='ajax_get_student_results'),
+    path('admin/ajax/save-marks/', views.ajax_save_marks, name='ajax_save_marks'),
 
     # Dynamic Result Form
     path('admin/dynamic-result/', views.dynamic_result_form, name='dynamic_result_form'),
 
-    # Professor URLs
+
+
     path('professor/dashboard/', views.professor_dashboard, name='professor_dashboard'),
     path('professor/subjects/', views.professor_subjects, name='professor_subjects'),
     path('professor/students/', views.professor_students, name='professor_students'),
     path('professor/attendance/', views.professor_attendance, name='professor_attendance'),
+    path('professor/attendance/list/', views.professor_attendance_list, name='professor_attendance_list'),
     path('professor/attendance/students/<int:subject_id>/', views.get_students_for_attendance, name='get_students_for_attendance'),
     path('professor/assignments/', views.professor_assignments, name='professor_assignments'),
     path('professor/assignments/<int:assignment_id>/submissions/', views.assignment_submissions, name='assignment_submissions'),
@@ -98,7 +122,29 @@ urlpatterns = [
     path('professor/events/', views.professor_events, name='professor_events'),
     path('professor/exams/', views.professor_exams, name='professor_exams'),
     path('professor/results/', views.professor_results_list, name='professor_results_list'),
+    path('professor/add-subject-result/', views.professor_dynamic_result, name='professor_dynamic_result'),
+    path('professor/ajax/get-student-results/', views.professor_ajax_get_student_results, name='professor_ajax_get_student_results'),
+    path('professor/ajax/get-semesters/', views.professor_ajax_get_semesters, name='professor_ajax_get_semesters'),
+    path('professor/ajax/get-subjects/', views.professor_ajax_get_subjects, name='professor_ajax_get_subjects'),
     path('professor/results/<int:exam_id>/add-marks/', views.add_marks, name='add_marks'),
+    
+    # Professor CRUD URLs
+    path('professor/students/create/', views.prof_create_student, name='prof_create_student'),
+    path('professor/students/<int:pk>/update/', views.prof_update_student, name='prof_update_student'),
+    path('professor/students/<int:pk>/delete/', views.prof_delete_student, name='prof_delete_student'),
+    
+    path('professor/notifications/<int:pk>/update/', views.prof_update_notification, name='prof_update_notification'),
+    path('professor/notifications/<int:pk>/delete/', views.prof_delete_notification, name='prof_delete_notification'),
+    
+    path('professor/assignments/<int:pk>/update/', views.prof_update_assignment, name='prof_update_assignment'),
+    path('professor/assignments/<int:pk>/delete/', views.prof_delete_assignment, name='prof_delete_assignment'),
+    
+    path('professor/events/create/', views.prof_create_event, name='prof_create_event'),
+    path('professor/events/<int:pk>/update/', views.prof_update_event, name='prof_update_event'),
+    path('professor/events/<int:pk>/delete/', views.prof_delete_event, name='prof_delete_event'),
+    
+    path('professor/exams/<int:pk>/update/', views.prof_update_exam, name='prof_update_exam'),
+    path('professor/exams/<int:pk>/delete/', views.prof_delete_exam, name='prof_delete_exam'),
 
     # Student URLs
     path('student/dashboard/', views.student_dashboard, name='student_dashboard'),

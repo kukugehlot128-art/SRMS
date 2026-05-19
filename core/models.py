@@ -17,36 +17,65 @@ class User(AbstractUser):
 
 
 class Course(models.Model):
-    CATEGORY_CHOICES = [
-        ('Science', 'Science'),
-        ('Commerce', 'Commerce'),
-        ('Arts', 'Arts'),
-        ('Technology', 'Technology'),
-        ('Management', 'Management'),
-        ('Other', 'Other')
-    ]
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=20, unique=True)
-    category = models.CharField(max_length=50, choices=CATEGORY_CHOICES, default='Other')
+    course_name = models.CharField(max_length=100)
+    # Keeping some old fields if needed by templates, but making them optional
+    code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    category = models.CharField(max_length=50, default='Other')
     description = models.TextField(blank=True)
     duration = models.CharField(max_length=50, default='3 Years')
+    total_semesters = models.IntegerField(default=6, help_text="Total number of semesters for this course")
     image = models.ImageField(upload_to='course_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    @property
+    def name(self):
+        return self.course_name
 
     def __str__(self):
-        return f"{self.code} - {self.name}"
+        return self.course_name
+
+
+class Stream(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='streams')
+    stream_name = models.CharField(max_length=100)
+    
+    @property
+    def name(self):
+        return self.stream_name
+
+    def __str__(self):
+        return f"{self.course.course_name} - {self.stream_name}"
+
+
+class AdmissionYear(models.Model):
+    year = models.IntegerField(unique=True)
+
+    def __str__(self):
+        return str(self.year)
+
 
 class Semester(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='semesters')
-    name = models.CharField(max_length=100) # e.g. 1BCA, 2BCA
+    stream = models.ForeignKey(Stream, on_delete=models.CASCADE, related_name='semesters')
+    semester_name = models.CharField(max_length=100)
     
+    @property
+    def name(self):
+        return self.semester_name
+
     def __str__(self):
-        return f"{self.course.code} - {self.name}"
+        return f"{self.stream.stream_name} - {self.semester_name}"
+
 
 class Subject(models.Model):
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=20, unique=True, null=True, blank=True)
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE, related_name='subjects')
+    subject_name = models.CharField(max_length=200)
+    
+    theory_max = models.IntegerField(default=100)
+    theory_min = models.IntegerField(default=35)
+    practical_max = models.IntegerField(default=50)
+    practical_min = models.IntegerField(default=15)
+    
+    code = models.CharField(max_length=20, unique=True, null=True, blank=True)
     professor = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, blank=True,
         related_name='teaching_subjects', limit_choices_to={'role': 'professor'}
@@ -54,30 +83,53 @@ class Subject(models.Model):
     credits = models.IntegerField(default=3)
     image = models.ImageField(upload_to='subject_images/', blank=True, null=True)
     description = models.TextField(blank=True)
+    
+    @property
+    def name(self):
+        return self.subject_name
 
     def __str__(self):
-        return f"{self.name} ({self.semester.name})"
+        return f"{self.subject_name} ({self.semester.semester_name})"
 
 
 class StudentProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile')
     roll_number = models.CharField(max_length=20, unique=True)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True)
+    
+    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True, related_name='students')
+    stream = models.ForeignKey(Stream, on_delete=models.SET_NULL, null=True, related_name='students')
+    admission_year = models.ForeignKey(AdmissionYear, on_delete=models.SET_NULL, null=True, related_name='students')
+    
     semester = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True)
     enrolled_subjects = models.ManyToManyField(Subject, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
     address = models.TextField(blank=True)
     admission_date = models.DateField(auto_now_add=True)
     
-    # New Fields based on requirements
     enrollment_number = models.CharField(max_length=50, blank=True, null=True)
-    admission_year = models.IntegerField(null=True, blank=True)
     father_name = models.CharField(max_length=100, blank=True)
     mother_name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
 
     def __str__(self):
         return f"{self.roll_number} - {self.user.get_full_name()}"
+
+
+class Marks(models.Model):
+    student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='marks')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE, related_name='marks')
+    theory_marks = models.IntegerField(default=0)
+    practical_marks = models.IntegerField(default=0)
+    internal_marks = models.IntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('student', 'subject')
+        verbose_name_plural = "Marks"
+
+    def __str__(self):
+        return f"{self.student.user.get_full_name()} - {self.subject.subject_name}"
 
 
 class ProfessorProfile(models.Model):
@@ -94,20 +146,39 @@ class ProfessorProfile(models.Model):
 
 
 class Attendance(models.Model):
-    STATUS_CHOICES = [('present', 'Present'), ('absent', 'Absent')]
+    STATUS_CHOICES = [
+        ('Present', 'Present'), 
+        ('Absent', 'Absent'),
+        ('Late', 'Late'),
+        ('Leave', 'Leave')
+    ]
+    attendance_id = models.CharField(max_length=20, unique=True, blank=True)
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='attendances')
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     date = models.DateField()
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='present')
+    lecture_no = models.CharField(max_length=50, default="1st lecture")
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Present')
+    remarks = models.CharField(max_length=255, blank=True, null=True)
     marked_by = models.ForeignKey(
         User, on_delete=models.SET_NULL, null=True, related_name='attendance_marked'
     )
 
     class Meta:
-        unique_together = ['student', 'subject', 'date']
+        unique_together = ['student', 'subject', 'date', 'lecture_no']
+
+    def save(self, *args, **kwargs):
+        if not self.attendance_id:
+            # We'll generate it after saving by updating it or using a transaction.
+            # But simpler: just prefix 'ATT' to the ID after first save.
+            pass
+        super().save(*args, **kwargs)
+        if not self.attendance_id:
+            self.attendance_id = f"ATT{self.id:04d}"
+            # Use update to avoid recursive save()
+            Attendance.objects.filter(id=self.id).update(attendance_id=self.attendance_id)
 
     def __str__(self):
-        return f"{self.student} - {self.subject} - {self.date} - {self.status}"
+        return f"{self.attendance_id} - {self.student} - {self.subject} - {self.date} - {self.status}"
 
 
 class Assignment(models.Model):

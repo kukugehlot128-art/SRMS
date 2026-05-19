@@ -91,7 +91,13 @@
             <span style="color: var(--text-light);">Posted: {{ assign.created_at|date:"M d, Y" }}</span>
             <span style="color: #EF4444; font-weight: 600;">Due: {{ assign.due_date|date:"M d, Y" }}</span>
         </div>
-        <div style="margin-top: 15px; text-align: right;">
+        <div style="margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;">
+            <a href="{% url 'core:prof_update_assignment' assign.id %}" class="btn" style="padding: 6px 15px; font-size: 0.85rem; background: #EBF5FF; color: #3B82F6; text-decoration: none;">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'core:prof_delete_assignment' assign.id %}" class="btn" style="padding: 6px 15px; font-size: 0.85rem; background: #FEF2F2; color: #EF4444; text-decoration: none;">
+                <i class="fas fa-trash-alt"></i> Delete
+            </a>
             <a href="{% url 'core:assignment_submissions' assign.id %}" class="btn"
                 style="padding: 6px 15px; font-size: 0.85rem; background: var(--secondary); color: white; text-decoration: none;">
                 View Submissions ({{ assign.submissions.count }})

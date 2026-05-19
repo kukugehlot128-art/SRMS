@@ -1,0 +1,464 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}{% if is_update %}Update{% else %}Create{% endif %} Exam{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --dark-bg: #ffffff;
+        --darker-bg: #f8fafc;
+        --dark-border: #cbd5e1;
+        --dark-text: #0f172a;
+        --muted-text: #64748b;
+        --btn-bg: #334155;
+    }
+
+    body {
+        background-color: var(--dark-bg);
+    }
+
+    .admit-card-container {
+        background-color: var(--dark-bg);
+        color: var(--dark-text);
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 30px;
+        border: 1px solid var(--dark-border);
+        border-radius: 8px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .ac-header {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 1px solid var(--dark-border);
+        padding-bottom: 20px;
+    }
+
+    .ac-header h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        margin: 0 0 5px 0;
+        color: var(--dark-text);
+    }
+
+    .ac-header p {
+        font-size: 0.85rem;
+        color: var(--muted-text);
+        margin: 0;
+    }
+
+    .ac-section-title {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--muted-text);
+        font-weight: 600;
+        margin: 25px 0 15px 0;
+    }
+
+    .ac-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+
+    .ac-grid-full {
+        grid-template-columns: 1fr;
+    }
+
+    .ac-form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ac-form-group label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--muted-text);
+        margin-bottom: 5px;
+        font-weight: 600;
+    }
+
+    .ac-input {
+        background-color: #ffffff;
+        border: 1px solid var(--dark-border);
+        border-radius: 4px;
+        padding: 10px 12px;
+        color: var(--dark-text);
+        font-size: 0.95rem;
+        width: 100%;
+    }
+
+    .ac-input:focus {
+        outline: none;
+        border-color: var(--dark-border);
+    }
+    
+    select.ac-input option {
+        background-color: #ffffff;
+        color: var(--dark-text);
+    }
+
+    .ac-table-container {
+        border: 1px solid var(--dark-border);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 15px;
+    }
+
+    .ac-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .ac-table th {
+        background-color: var(--darker-bg);
+        padding: 12px 15px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--muted-text);
+        font-weight: 600;
+        border-bottom: 1px solid var(--dark-border);
+    }
+
+    .ac-table td {
+        padding: 12px 15px;
+        border-bottom: 1px solid var(--dark-border);
+    }
+
+    .ac-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ac-btn {
+        background-color: var(--btn-bg);
+        color: white;
+        border: 1px solid var(--btn-bg);
+        padding: 12px;
+        border-radius: 4px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        text-align: center;
+        display: block;
+        width: 100%;
+        text-decoration: none;
+    }
+
+    .ac-remove-btn {
+        background: transparent;
+        color: #ef4444;
+        border: 1px solid #fca5a5;
+        background-color: #fef2f2;
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    /* Override admin base styles where necessary */
+    .content-area {
+        background-color: #f1f5f9 !important; /* Light clean outer background */
+    }
+</style>
+
+<div class="admit-card-container">
+    <div class="ac-header">
+        <h2>CODECRAFT COLLEGE (PROFESSOR EXAM PANEL)</h2>
+        <p>Examination Scheduling & Timetable Form</p>
+    </div>
+
+    <form method="POST" id="examForm">
+        {% csrf_token %}
+        
+        <div class="ac-section-title">THEORY EXAM TIMETABLE</div>
+
+
+        <div id="examEntriesContainer">
+            {% if is_update %}
+            <div class="exam-entry" style="border: 1px solid var(--dark-border); padding: 20px; margin-bottom: 20px; border-radius: 8px; background: #ffffff; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <div class="ac-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="ac-form-group" style="grid-column: 1 / -1;"> <!-- Make it span full row -->
+                        <label style="color: #4F46E5;">Time Table ID</label>
+                        <input type="text" class="ac-input" readonly placeholder="Auto-generated upon save" value="{% if is_update %}TT-{{ exam.id|stringformat:'05d' }}{% endif %}" style="background: #F3F4F6; font-weight: 600;">
+                    </div>
+                    
+                    <div class="ac-form-group">
+                        <label>Exam Type</label>
+                        <select name="exam_type_id[]" class="ac-input" required>
+                            <option value="">Select Type</option>
+                            {% for et in exam_types %}
+                            <option value="{{ et.id }}" {% if exam.exam_type_id == et.id %}selected{% endif %}>{{ et.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Course Name</label>
+                        <select class="ac-input course-select" onchange="filterSemesters(this)" required>
+                            <option value="">Select Course</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}" {% if exam.subject.semester.stream.course_id == course.id %}selected{% endif %}>{{ course.course_name }} ({{ course.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="ac-form-group">
+                        <label>Stream Name</label>
+                        <select class="ac-input semester-select" onchange="filterSubjects(this)" required>
+                            <option value="">Select Stream</option>
+                            {% for sem in semesters %}
+                            <option value="{{ sem.id }}" data-course-id="{{ sem.stream.course.id }}" {% if exam.subject.semester_id == sem.id %}selected{% endif %}>{{ sem.stream.stream_name }} - {{ sem.semester_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Subject Name</label>
+                        <select name="subject_id[]" class="ac-input subject-select" onchange="updateSubjectCode(this)" required>
+                            <option value="">Select Subject</option>
+                            {% for sub in subjects %}
+                            <option value="{{ sub.id }}" data-semester-id="{{ sub.semester.id }}" data-code="{{ sub.code }}" {% if exam.subject_id == sub.id %}selected{% endif %}>{{ sub.subject_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Exam Date</label>
+                        <input type="date" name="date[]" class="ac-input" required value="{{ exam.date|date:'Y-m-d' }}">
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Exam Time</label>
+                        <input type="time" name="start_time[]" class="ac-input" required value="{{ exam.start_time|time:'H:i' }}">
+                        <input type="hidden" name="end_time[]" value="{% if exam.end_time %}{{ exam.end_time|time:'H:i' }}{% else %}23:59{% endif %}">
+                    </div>
+
+                    <input type="hidden" name="room[]" value="{{ exam.room|default:'N/A' }}">
+                    <input type="hidden" class="subject-code" value="{{ exam.subject.code }}">
+                    <input type="hidden" name="total_marks[]" value="{{ exam.total_marks|default:'100' }}">
+                </div>
+            </div>
+            {% else %}
+            <div class="exam-entry" style="border: 1px solid var(--dark-border); padding: 20px; margin-bottom: 20px; border-radius: 8px; background: #ffffff; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                <button type="button" class="ac-remove-btn" style="position: absolute; top: -10px; right: -10px; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);" onclick="removeRow(this)"><i class="fas fa-times"></i></button>
+                <div class="ac-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                    <div class="ac-form-group" style="grid-column: 1 / -1;"> <!-- Make it span full row -->
+                        <label style="color: #4F46E5;">Time Table ID</label>
+                        <input type="text" class="ac-input" readonly placeholder="Auto-generated upon save" style="background: #F3F4F6; font-weight: 600;">
+                    </div>
+                    
+                    <div class="ac-form-group">
+                        <label>Exam Type</label>
+                        <select name="exam_type_id[]" class="ac-input" required>
+                            <option value="">Select Type</option>
+                            {% for et in exam_types %}
+                            <option value="{{ et.id }}">{{ et.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Course Name</label>
+                        <select class="ac-input course-select" onchange="filterSemesters(this)" required>
+                            <option value="">Select Course</option>
+                            {% for course in courses %}
+                            <option value="{{ course.id }}">{{ course.course_name }} ({{ course.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="ac-form-group">
+                        <label>Stream Name</label>
+                        <select class="ac-input semester-select" onchange="filterSubjects(this)" required>
+                            <option value="">Select Stream</option>
+                            {% for sem in semesters %}
+                            <option value="{{ sem.id }}" data-course-id="{{ sem.stream.course.id }}">{{ sem.stream.stream_name }} - {{ sem.semester_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Subject Name</label>
+                        <select name="subject_id[]" class="ac-input subject-select" onchange="updateSubjectCode(this)" required>
+                            <option value="">Select Subject</option>
+                            {% for sub in subjects %}
+                            <option value="{{ sub.id }}" data-semester-id="{{ sub.semester.id }}" data-code="{{ sub.code }}">{{ sub.subject_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Exam Date</label>
+                        <input type="date" name="date[]" class="ac-input" required>
+                    </div>
+
+                    <div class="ac-form-group">
+                        <label>Exam Time</label>
+                        <input type="time" name="start_time[]" class="ac-input" required>
+                        <input type="hidden" name="end_time[]" value="23:59">
+                    </div>
+
+                    <input type="hidden" name="room[]" value="N/A">
+                    <input type="hidden" class="subject-code" value="">
+                    
+                    <input type="hidden" name="total_marks[]" value="100">
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        {% if not is_update %}
+        <button type="button" class="ac-btn" style="background: transparent; border: 2px dashed var(--dark-border); color: var(--muted-text); margin-bottom: 20px;" onclick="addRow()">
+            + Add Another Exam Entry
+        </button>
+        {% endif %}
+
+        <button type="submit" class="ac-btn">
+            <i class="fas fa-plus"></i> {% if is_update %}Update{% else %}Add{% endif %}
+        </button>
+    </form>
+</div>
+
+<script>
+    let masterSemesters = [];
+    let masterSubjects = [];
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Cache master lists
+        let semSelect = document.querySelector('.semester-select');
+        if (semSelect) {
+            masterSemesters = Array.from(semSelect.options).map(o => ({
+                value: o.value, text: o.text, courseId: o.getAttribute('data-course-id')
+            }));
+        }
+        
+        let subSelect = document.querySelector('.subject-select');
+        if (subSelect) {
+            masterSubjects = Array.from(subSelect.options).map(o => ({
+                value: o.value, text: o.text, semesterId: o.getAttribute('data-semester-id'), code: o.getAttribute('data-code')
+            }));
+        }
+
+        // Init filtering logic if updating
+        if (document.querySelectorAll('.course-select').length > 0) {
+            document.querySelectorAll('.course-select').forEach(sel => {
+                if(sel.value) filterSemesters(sel, true);
+            });
+            document.querySelectorAll('.semester-select').forEach(sel => {
+                if(sel.value) filterSubjects(sel, true);
+            });
+        }
+    });
+
+    function filterSemesters(courseSelect, initialLoad=false) {
+        let entry = courseSelect.closest('.exam-entry');
+        let courseId = courseSelect.value;
+        let semesterSelect = entry.querySelector('.semester-select');
+        let subjectSelect = entry.querySelector('.subject-select');
+        let subjectCode = entry.querySelector('.subject-code');
+        
+        let currentValue = semesterSelect.value;
+
+        semesterSelect.innerHTML = '<option value="">Select Stream</option>';
+        masterSemesters.forEach(s => {
+            if (s.value === "") return;
+            if (s.courseId === courseId) {
+                let opt = document.createElement('option');
+                opt.value = s.value; opt.text = s.text; opt.setAttribute('data-course-id', s.courseId);
+                semesterSelect.appendChild(opt);
+            }
+        });
+
+        if (!initialLoad) {
+            semesterSelect.value = '';
+            subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+            if (subjectCode) subjectCode.value = '';
+        } else {
+            semesterSelect.value = currentValue;
+        }
+    }
+
+    function filterSubjects(semesterSelect, initialLoad=false) {
+        let entry = semesterSelect.closest('.exam-entry');
+        let semesterId = semesterSelect.value;
+        let subjectSelect = entry.querySelector('.subject-select');
+        let subjectCode = entry.querySelector('.subject-code');
+        
+        let currentValue = subjectSelect.value;
+
+        subjectSelect.innerHTML = '<option value="">Select Subject</option>';
+        let count = 0;
+        masterSubjects.forEach(s => {
+            if (s.value === "") return;
+            if (s.semesterId === semesterId) {
+                let opt = document.createElement('option');
+                opt.value = s.value; opt.text = s.text; 
+                opt.setAttribute('data-semester-id', s.semesterId);
+                opt.setAttribute('data-code', s.code);
+                subjectSelect.appendChild(opt);
+                count++;
+            }
+        });
+        
+        if (semesterId && count === 0) {
+            let opt = document.createElement('option');
+            opt.value = ""; opt.text = "No subjects found for this stream";
+            opt.disabled = true;
+            subjectSelect.appendChild(opt);
+        }
+
+        if (!initialLoad) {
+            subjectSelect.value = '';
+            if (subjectCode) subjectCode.value = '';
+        } else {
+            subjectSelect.value = currentValue;
+        }
+    }
+
+    function updateSubjectCode(subjectSelect) {
+        let entry = subjectSelect.closest('.exam-entry');
+        let opt = subjectSelect.options[subjectSelect.selectedIndex];
+        let code = opt ? opt.getAttribute('data-code') : '';
+        entry.querySelector('.subject-code').value = code || '';
+    }
+
+    function addRow() {
+        const container = document.getElementById('examEntriesContainer');
+        const firstEntry = container.querySelector('.exam-entry');
+        const clone = firstEntry.cloneNode(true);
+        
+        // Reset values
+        clone.querySelectorAll('input:not([type="hidden"]), select').forEach(el => {
+            el.value = '';
+        });
+        clone.querySelector('input[name="total_marks[]"]').value = "100";
+        
+        // Reset options visibility
+        clone.querySelectorAll('option').forEach(opt => {
+            opt.style.display = '';
+            opt.hidden = false;
+            opt.disabled = false;
+        });
+
+        container.appendChild(clone);
+    }
+
+    function removeRow(btn) {
+        const entry = btn.closest('.exam-entry');
+        const container = document.getElementById('examEntriesContainer');
+        if (container.children.length > 1) {
+            entry.remove();
+        } else {
+            alert("Cannot remove the last exam entry.");
+        }
+    }
+</script>
+{% endblock %}

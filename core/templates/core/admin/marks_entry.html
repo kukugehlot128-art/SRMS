@@ -1,0 +1,639 @@
+{% extends "core/admin/base.html" %}
+
+{% block title %}Student Marks Entry{% endblock %}
+
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--card-border);
+        margin-bottom: 24px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .filter-grid-bottom {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .marks-section {
+        display: none;
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--card-border);
+        overflow: hidden;
+        margin-bottom: 24px;
+    }
+
+    .marks-section-header {
+        background: linear-gradient(135deg, #1e1b4b, #3730a3);
+        color: white;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .marks-section-header h4 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .student-badge {
+        background: rgba(255,255,255,0.2);
+        color: white;
+        padding: 4px 14px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border: 1px solid rgba(255,255,255,0.3);
+    }
+
+    .marks-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .marks-table thead tr {
+        background: #f8fafc;
+    }
+
+    .marks-table th {
+        padding: 12px 15px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        border-bottom: 2px solid #e2e8f0;
+        text-align: left;
+    }
+
+    .marks-table td {
+        padding: 10px 15px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .marks-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .subject-cell {
+        font-weight: 600;
+        color: var(--text-main);
+        font-size: 0.95rem;
+    }
+
+    .subject-code-cell {
+        font-size: 0.8rem;
+        color: var(--text-light);
+        margin-top: 3px;
+    }
+
+    .mark-input-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .mark-range-label {
+        font-size: 0.75rem;
+        color: var(--text-light);
+        font-weight: 600;
+    }
+
+    .mark-input {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1.5px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        color: var(--text-main);
+        background: white;
+        transition: border-color 0.2s;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .mark-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .mark-input.border-primary { border-color: #3b82f6; }
+
+    .total-display {
+        font-weight: 700;
+        font-size: 1.15rem;
+        color: #3b82f6;
+        text-align: center;
+    }
+
+    .pct-display {
+        font-weight: 700;
+        font-size: 1rem;
+        text-align: center;
+    }
+
+    .result-select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1.5px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-main);
+        background: white;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 15px;
+        padding-right: 30px;
+    }
+
+    .result-select.pass { color: #065f46; border-color: #10b981; background-color: #d1fae5; }
+    .result-select.fail { color: #991b1b; border-color: #ef4444; background-color: #fee2e2; }
+    .result-select.backlog { color: #92400e; border-color: #f59e0b; background-color: #fef3c7; }
+
+    .marks-footer {
+        padding: 16px 24px;
+        border-top: 1px solid var(--card-border);
+        background: #f8fafc;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .step-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #818cf8;
+        margin-bottom: 6px;
+    }
+
+    @media (max-width: 1200px) {
+        .filter-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+        .filter-grid { grid-template-columns: 1fr; }
+        .filter-grid-bottom { grid-template-columns: 1fr; }
+    }
+
+    /* ── Toast Notification ── */
+    #toast-notify {
+        position: fixed;
+        top: 24px;
+        right: 30px;
+        z-index: 9999;
+        min-width: 280px;
+        max-width: 400px;
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: white;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        opacity: 0;
+        transform: translateY(-16px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        pointer-events: none;
+    }
+    #toast-notify.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    #toast-notify.success { background: linear-gradient(135deg, #059669, #10b981); }
+    #toast-notify.error   { background: linear-gradient(135deg, #dc2626, #ef4444); }
+    #toast-notify.warning { background: linear-gradient(135deg, #d97706, #f59e0b); }
+    #toast-notify.info    { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Toast Notification -->
+<div id="toast-notify">
+    <i id="toast-icon" class="fas fa-check-circle"></i>
+    <span id="toast-msg"></span>
+</div>
+<div class="page-title">
+    <h2><i class="fas fa-pen-alt" style="color: var(--primary); margin-right: 10px;"></i>Student Marks Entry</h2>
+    <a href="{% url 'core:manage_results' %}" class="btn" style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Results
+    </a>
+</div>
+
+<p style="color: var(--text-light); margin-top: -18px; margin-bottom: 20px; font-size: 0.9rem;">
+    Follow the steps below in order to load subjects and enter marks.
+</p>
+
+<!-- Step 1–4: Filters -->
+<div class="filter-card">
+    <div style="font-weight: 600; color: var(--primary); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px; margin-bottom: 18px; font-size: 1rem;">
+        <i class="fas fa-filter"></i>&nbsp; Filters &amp; Selection
+    </div>
+
+    <div class="filter-grid">
+        <div class="form-group">
+            <div class="step-label">Step 1</div>
+            <label for="courseSelect">Select Course</label>
+            <select id="courseSelect" class="form-control">
+                <option value="">-- Choose Course --</option>
+                {% for course in courses %}
+                <option value="{{ course.id }}">{{ course.course_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="step-label">Step 2</div>
+            <label for="streamSelect">Select Stream</label>
+            <select id="streamSelect" class="form-control" disabled>
+                <option value="">-- Select Course First --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="step-label">Step 3</div>
+            <label for="semesterSelect">Select Semester</label>
+            <select id="semesterSelect" class="form-control" disabled>
+                <option value="">-- Select Stream First --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <div class="step-label">Step 4</div>
+            <label for="admissionYearSelect">Admission Year</label>
+            <select id="admissionYearSelect" class="form-control" disabled>
+                <option value="">-- Select Semester First --</option>
+                {% for year in admission_years %}
+                <option value="{{ year.id }}">{{ year.year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <div class="filter-grid-bottom">
+        <div class="form-group" style="margin-bottom: 0;">
+            <div class="step-label">Step 5</div>
+            <label for="studentSelect">Select Student</label>
+            <select id="studentSelect" class="form-control" disabled>
+                <option value="">-- Complete All Steps Above --</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0; display: flex; align-items: flex-end;">
+            <button id="fetchSubjectsBtn" class="btn" style="width: 100%; justify-content: center; background: var(--primary); color: white; padding: 11px;" disabled>
+                <i class="fas fa-search"></i>&nbsp; Fetch Subjects &amp; Marks
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Marks Entry Section -->
+<div id="marksEntrySection" class="marks-section">
+    <div class="marks-section-header">
+        <div>
+            <h4><i class="fas fa-table" style="margin-right: 8px;"></i>Marks Entry Panel</h4>
+            <p style="font-size: 0.8rem; opacity: 0.75; margin-top: 4px; margin-bottom: 0;">Enter marks for each subject below. Results are calculated automatically.</p>
+        </div>
+        <span id="selectedStudentName" class="student-badge">—</span>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="marks-table">
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Subject</th>
+                    <th style="width: 15%;">Theory Marks</th>
+                    <th style="width: 15%;">Practical Marks</th>
+                    <th style="width: 12%;">Internal Marks</th>
+                    <th style="width: 8%; text-align: center;">Total</th>
+                    <th style="width: 10%; text-align: center;">Percentage</th>
+                    <th style="width: 13%;">Result Status</th>
+                </tr>
+            </thead>
+            <tbody id="subjectsTableBody">
+                <!-- Rows injected via JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <div class="marks-footer">
+        <button id="saveMarksBtn" class="btn" style="background: #10b981; color: white; padding: 11px 28px; font-size: 0.95rem;">
+            <i class="fas fa-save"></i>&nbsp; Save All Marks
+        </button>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const courseSelect = document.getElementById('courseSelect');
+    const streamSelect = document.getElementById('streamSelect');
+    const semesterSelect = document.getElementById('semesterSelect');
+    const admissionYearSelect = document.getElementById('admissionYearSelect');
+    const studentSelect = document.getElementById('studentSelect');
+    const fetchSubjectsBtn = document.getElementById('fetchSubjectsBtn');
+    const marksEntrySection = document.getElementById('marksEntrySection');
+    const subjectsTableBody = document.getElementById('subjectsTableBody');
+    const saveMarksBtn = document.getElementById('saveMarksBtn');
+
+    let currentSubjects = [];
+
+    // Remove trailing "(Sem X)" or semester info appended to subject names from DB
+    function cleanSubjectName(name) {
+        if (!name) return name;
+        // Strip patterns like "(Sem 1)", "(Semester 1)", "(1st Sem)" from the end
+        return name.replace(/\s*\(.*?(sem|semester)[^)]*\)\s*$/i, '').trim();
+    }
+
+    async function fetchJson(url) {
+        try {
+            const response = await fetch(url);
+            return await response.json();
+        } catch (e) {
+            console.error("Fetch Error:", e);
+            return [];
+        }
+    }
+
+    function resetFrom(level) {
+        if (level <= 2) {
+            streamSelect.innerHTML = '<option value="">-- Choose Stream --</option>';
+            streamSelect.disabled = true;
+        }
+        if (level <= 3) {
+            semesterSelect.innerHTML = '<option value="">-- Choose Semester --</option>';
+            semesterSelect.disabled = true;
+        }
+        if (level <= 4) {
+            admissionYearSelect.disabled = true;
+        }
+        if (level <= 5) {
+            studentSelect.innerHTML = '<option value="">-- Complete All Steps Above --</option>';
+            studentSelect.disabled = true;
+            fetchSubjectsBtn.disabled = true;
+        }
+        marksEntrySection.style.display = 'none';
+    }
+
+    courseSelect.addEventListener('change', async function () {
+        resetFrom(2);
+        if (!this.value) return;
+        const data = await fetchJson(`/admin/ajax/get-streams/?course_id=${this.value}`);
+        if (data.length > 0) {
+            data.forEach(item => streamSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            streamSelect.disabled = false;
+        } else {
+            streamSelect.innerHTML = '<option value="">-- No Streams Found --</option>';
+        }
+    });
+
+    streamSelect.addEventListener('change', async function () {
+        resetFrom(3);
+        if (!this.value) return;
+        const data = await fetchJson(`/admin/ajax/get-semesters/?stream_id=${this.value}`);
+        if (data.length > 0) {
+            data.forEach(item => semesterSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            semesterSelect.disabled = false;
+        } else {
+            semesterSelect.innerHTML = '<option value="">-- No Semesters Found --</option>';
+        }
+    });
+
+    semesterSelect.addEventListener('change', function () {
+        resetFrom(4);
+        if (this.value) admissionYearSelect.disabled = false;
+    });
+
+    admissionYearSelect.addEventListener('change', async function () {
+        resetFrom(5);
+        const courseId = courseSelect.value;
+        const streamId = streamSelect.value;
+        const semId = semesterSelect.value;
+        const yearId = this.value;
+        if (!courseId || !streamId || !semId || !yearId) return;
+
+        const qs = `course_id=${courseId}&stream_id=${streamId}&semester_id=${semId}&admission_year_id=${yearId}`;
+        const students = await fetchJson(`/admin/ajax/get-students/?${qs}`);
+        if (students.length > 0) {
+            students.forEach(item => studentSelect.innerHTML += `<option value="${item.id}">${item.name}</option>`);
+            studentSelect.disabled = false;
+        } else {
+            studentSelect.innerHTML = '<option value="">-- No Students Found --</option>';
+        }
+    });
+
+    studentSelect.addEventListener('change', function () {
+        fetchSubjectsBtn.disabled = !this.value;
+        marksEntrySection.style.display = 'none';
+    });
+
+    fetchSubjectsBtn.addEventListener('click', async function () {
+        const studentId = studentSelect.value;
+        const semsId = semesterSelect.value;
+        if (!studentId || !semsId) return;
+
+        const studentName = studentSelect.options[studentSelect.selectedIndex].text;
+        document.getElementById('selectedStudentName').innerText = studentName;
+
+        fetchSubjectsBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp; Loading...';
+        fetchSubjectsBtn.disabled = true;
+
+        currentSubjects = await fetchJson(`/admin/ajax/get-subjects/?semester_id=${semsId}`);
+
+        fetchSubjectsBtn.innerHTML = '<i class="fas fa-search"></i>&nbsp; Fetch Subjects & Marks';
+        fetchSubjectsBtn.disabled = false;
+
+        if (currentSubjects.length === 0) {
+            showToast('No subjects found for this semester. Please assign subjects first.', 'warning');
+            return;
+        }
+
+        const subjectIdsQuery = currentSubjects.map(s => `subject_ids[]=${s.id}`).join('&');
+        const existingResults = await fetchJson(`/admin/ajax/get-student-results/?student_id=${studentId}&${subjectIdsQuery}`);
+
+        const resultsMap = {};
+        existingResults.forEach(r => { resultsMap[r.subject_id] = r; });
+
+        window.calculateRow = function (sid, tMax, tMin, pMax, pMin) {
+            const tObt = parseFloat(document.getElementById(`t-obt-${sid}`).value) || 0;
+            const pObt = parseFloat(document.getElementById(`p-obt-${sid}`).value) || 0;
+            const iObt = parseFloat(document.getElementById(`i-obt-${sid}`).value) || 0;
+            const totalObt = tObt + pObt + iObt;
+            const totalMax = tMax + pMax + 25;
+
+            document.getElementById(`tot-${sid}`).innerText = totalObt;
+
+            let pct = 0;
+            if (totalMax > 0) pct = (totalObt / totalMax) * 100;
+            const pctEl = document.getElementById(`pct-${sid}`);
+            pctEl.innerText = pct.toFixed(1) + '%';
+
+            let status = "Pass";
+            if (tObt < tMin || pObt < pMin) status = "Fail";
+
+            const resSelect = document.getElementById(`res-${sid}`);
+            if (!resSelect.dataset.manualOverride) resSelect.value = status;
+            status = resSelect.value;
+
+            // Style the select and percentage based on status
+            resSelect.className = 'result-select ' + status.toLowerCase();
+            pctEl.style.color = (status === 'Fail') ? '#dc2626' : '#059669';
+        };
+
+        subjectsTableBody.innerHTML = '';
+        currentSubjects.forEach(subject => {
+            const r = resultsMap[subject.id] || {};
+            const sid = subject.id;
+            const subjectName = cleanSubjectName(subject.subject_name || subject.name);
+            const subjectCode = subject.code || subject.subject_code || '';
+            const tMax = subject.theory_max || subject.t_max || 100;
+            const tMin = subject.theory_min || subject.t_min || 35;
+            const pMax = subject.practical_max || subject.p_max || 50;
+            const pMin = subject.practical_min || subject.p_min || 15;
+            const tMarks = r.theory_marks !== undefined ? r.theory_marks : '';
+            const pMarks = r.practical_marks !== undefined ? r.practical_marks : '';
+            const iMarks = r.internal_marks !== undefined ? r.internal_marks : '';
+            const statusVal = r.result_status || 'Pass';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>
+                    <div class="subject-cell">${subjectName}</div>
+                    ${subjectCode ? `<div class="subject-code-cell">${subjectCode}</div>` : ''}
+                </td>
+                <td>
+                    <div class="mark-input-wrapper">
+                        <span class="mark-range-label">Max: ${tMax} | Min: ${tMin}</span>
+                        <input type="number" id="t-obt-${sid}" class="mark-input border-primary"
+                               data-subject-id="${sid}" value="${tMarks}" min="0" max="${tMax}"
+                               placeholder="Obtained" oninput="calculateRow(${sid}, ${tMax}, ${tMin}, ${pMax}, ${pMin})">
+                    </div>
+                </td>
+                <td>
+                    <div class="mark-input-wrapper">
+                        <span class="mark-range-label">Max: ${pMax} | Min: ${pMin}</span>
+                        <input type="number" id="p-obt-${sid}" class="mark-input border-primary"
+                               data-subject-id="${sid}" value="${pMarks}" min="0" max="${pMax}"
+                               placeholder="Obtained" oninput="calculateRow(${sid}, ${tMax}, ${tMin}, ${pMax}, ${pMin})">
+                    </div>
+                </td>
+                <td>
+                    <div class="mark-input-wrapper">
+                        <span class="mark-range-label">Max: 25</span>
+                        <input type="number" id="i-obt-${sid}" class="mark-input border-primary"
+                               data-subject-id="${sid}" value="${iMarks}" min="0" max="25"
+                               placeholder="Obtained" oninput="calculateRow(${sid}, ${tMax}, ${tMin}, ${pMax}, ${pMin})">
+                    </div>
+                </td>
+                <td>
+                    <span id="tot-${sid}" class="total-display">0</span>
+                </td>
+                <td>
+                    <span id="pct-${sid}" class="pct-display" style="color: #059669;">0%</span>
+                </td>
+                <td>
+                    <select id="res-${sid}" class="result-select pass"
+                            data-subject-id="${sid}"
+                            onchange="this.dataset.manualOverride='true'; calculateRow(${sid}, ${tMax}, ${tMin}, ${pMax}, ${pMin})">
+                        <option value="Pass" ${statusVal === 'Pass' ? 'selected' : ''}>✔ Pass</option>
+                        <option value="Fail" ${statusVal === 'Fail' ? 'selected' : ''}>✘ Fail</option>
+                        <option value="Backlog" ${statusVal === 'Backlog' ? 'selected' : ''}>⚠ Backlog</option>
+                    </select>
+                </td>
+            `;
+            subjectsTableBody.appendChild(tr);
+            setTimeout(() => calculateRow(sid, tMax, tMin, pMax, pMin), 0);
+        });
+
+        marksEntrySection.style.display = 'block';
+    });
+
+    saveMarksBtn.addEventListener('click', async function () {
+        const studentId = studentSelect.value;
+        if (!studentId) return;
+
+        const payload = { student_id: studentId, marks: [] };
+        currentSubjects.forEach(subject => {
+            const sid = subject.id;
+            payload.marks.push({
+                subject_id: sid,
+                theory_marks: document.getElementById(`t-obt-${sid}`).value || 0,
+                practical_marks: document.getElementById(`p-obt-${sid}`).value || 0,
+                internal_marks: document.getElementById(`i-obt-${sid}`).value || 0,
+                result_status: document.getElementById(`res-${sid}`).value
+            });
+        });
+
+        try {
+            const origText = saveMarksBtn.innerHTML;
+            saveMarksBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>&nbsp; Saving...';
+            saveMarksBtn.disabled = true;
+
+            const res = await fetch('/admin/ajax/save-marks/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                showToast('Marks saved successfully!', 'success');
+            } else {
+                showToast('Error saving marks: ' + data.message, 'error');
+            }
+        } catch (e) {
+            console.error(e);
+            showToast('Network error occurred. Please try again.', 'error');
+        } finally {
+            saveMarksBtn.innerHTML = '<i class="fas fa-save"></i>&nbsp; Save All Marks';
+            saveMarksBtn.disabled = false;
+        }
+    });
+});
+
+// ── Toast Notification Function ──
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('toast-notify');
+    const msg = document.getElementById('toast-msg');
+    const icon = document.getElementById('toast-icon');
+    const icons = {
+        success: 'fas fa-check-circle',
+        error:   'fas fa-times-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info:    'fas fa-info-circle'
+    };
+    toast.className = type;
+    icon.className = icons[type] || icons.info;
+    msg.textContent = message;
+    toast.classList.add('show');
+    clearTimeout(toast._timer);
+    toast._timer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3500);
+}
+</script>
+{% endblock %}

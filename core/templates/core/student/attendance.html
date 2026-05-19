@@ -10,7 +10,7 @@
         <select name="subject" style="padding: 8px; border-radius: 5px; border: 1px solid #E5E7EB;">
             <option value="">All Subjects</option>
             {% for subj in subjects %}
-            <option value="{{ subj.id }}" {% if filter_subj == subj.id|stringformat:"s" %}selected{% endif %}>{{ subj.name
+            <option value="{{ subj.id }}" {% if filter_subj == subj.id|stringformat:'s' %}selected{% endif %}>{{ subj.name
                 }}</option>
             {% endfor %}
         </select>

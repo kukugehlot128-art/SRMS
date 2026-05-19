@@ -3,8 +3,53 @@
 {% block title %}Results{% endblock %}
 
 {% block content %}
+<style>
+    @media print {
+        /* Hide sidebar, header, and buttons when printing */
+        .sidebar, .header, .btn, .no-print {
+            display: none !important;
+        }
+        
+        /* Adjust layout for full width */
+        .main-content {
+            margin-left: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        /* Format card as a clean report */
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+            margin: 0 !important;
+            padding: 20px !important;
+        }
+
+        /* Set page margins */
+        @page {
+            margin: 2cm;
+            size: A4 portrait;
+        }
+
+        body {
+            background: white !important;
+            color: black !important;
+        }
+
+        .page-title {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    }
+</style>
+
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-    <h2 class="page-title" style="margin-bottom: 0;">Academic Results</h2>
+    <h2 class="page-title" style="margin-bottom: 0;">Academic Results Report Card</h2>
+    <button class="btn no-print" onclick="window.print()" style="background: #ef4444; color: white;">
+        <i class="fas fa-file-pdf"></i> Download PDF
+    </button>
 </div>
 
 {% if results %}

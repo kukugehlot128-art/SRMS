@@ -1,0 +1,60 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Update Event / Gallery Item{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Update Campus Event</h2>
+    <a href="{% url 'core:professor_events' %}" class="btn"
+        style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+        <i class="fas fa-arrow-left"></i> Back to Events
+    </a>
+</div>
+
+<div class="card" style="width: 100%; max-width: 650px;">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Event Title</label>
+            <input type="text" name="title" class="form-control" required value="{{ event.title }}">
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" name="event_date" class="form-control" required
+                    value="{{ event.event_date|date:'Y-m-d' }}">
+            </div>
+            <div class="form-group">
+                <label>Venue / Location</label>
+                <input type="text" name="venue" class="form-control" value="{{ event.venue|default:'' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Description (Details/Schedule)</label>
+            <textarea name="description" class="form-control" rows="5" required>{{ event.description }}</textarea>
+        </div>
+
+        <div class="form-group"
+            style="background: #F9FAFB; padding: 15px; border: 1px dashed #D1D5DB; border-radius: 8px;">
+            <label style="color: var(--secondary);"><i class="fas fa-cloud-upload-alt"></i> Update Event Image
+                (Optional)</label>
+            {% if event.image %}
+            <div style="margin-bottom: 10px; font-size: 0.85rem; color: var(--text-light);">
+                Current image: <a href="{{ event.image.url }}" target="_blank" style="color: #4F46E5;">{{
+                    event.image.name }}</a>
+            </div>
+            {% endif %}
+            <input type="file" name="image" class="form-control" accept="image/*"
+                style="border: none; background: transparent; padding: 5px 0;">
+            <small style="color: var(--text-light); display: block;">Leave blank to keep existing image</small>
+        </div>
+
+        <button type="submit" class="btn"
+            style="width: 100%; justify-content: center; margin-top: 15px; background: #EC4899;">
+            <i class="fas fa-save"></i> Save Event Changes
+        </button>
+    </form>
+</div>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 {% load static %}
-{% block title %}EduResult – Student Result Management System{% endblock %}
+{% block title %}CodeCraft College – Student Result Management System{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -9,7 +9,7 @@
     }
 
     .hero {
-        background: url('{% static "images/hero_campus.png" %}') center/cover no-repeat;
+        background: url('{% static 'images/hero_campus.png' %}') center/cover no-repeat;
         padding: 10rem 2rem;
         border-radius: 0;
         margin-top: -2rem;
@@ -226,10 +226,20 @@
                 <div style="height: 220px; overflow: hidden; position: relative;">
                     {% if course.image %}
                         <img src="{{ course.image.url }}" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    {% elif course.code == 'PGDCA' %}
+                        <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    {% elif course.code == 'DCA' %}
+                        <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    {% elif course.code == 'MCA' %}
+                        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    {% elif course.code == 'BCA' %}
+                        <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    {% elif course.code == 'BBA' %}
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
+                    {% elif course.code == 'MBA' %}
+                        <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
                     {% else %}
-                        <div style="width: 100%; height: 100%; background: #e2e8f0; display: flex; align-items: center; justify-content: center;">
-                            <i class="fas fa-image" style="font-size: 3rem; color: #94a3b8;"></i>
-                        </div>
+                        <img src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="{{ course.name }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s;" onmouseover="this.style.transform='scale(1.08)';" onmouseout="this.style.transform='scale(1)';">
                     {% endif %}
                     <span style="position: absolute; top: 1rem; right: 1rem; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(4px); color: var(--primary); font-size: 0.85rem; font-weight: 700; padding: 0.4rem 1rem; border-radius: 9999px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); z-index: 10; text-transform: uppercase;">{{ course.category|default:"Course" }}</span>
                 </div>

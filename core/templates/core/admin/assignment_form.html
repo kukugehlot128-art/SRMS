@@ -25,8 +25,7 @@
             <select name="subject_id" class="form-control" required>
                 <option value="">-- Select Subject --</option>
                 {% for subject in subjects %}
-                <option value="{{ subject.id }}" {% if assignment.subject_id == subject.id %}selected{% endif %}>{{
-                    subject.code }} - {{ subject.name }}</option>
+                <option value="{{ subject.id }}" {% if assignment.subject_id == subject.id %}selected{% endif %}>{{ subject.code }} - {{ subject.name }}</option>
                 {% endfor %}
             </select>
         </div>

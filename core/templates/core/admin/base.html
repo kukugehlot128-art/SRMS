@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Administration Portal{% endblock %} - EduResult</title>
+    <title>{% block title %}Administration Portal{% endblock %} - CodeCraft College</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
@@ -406,7 +406,7 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-university"></i>
-            <h2>EduResult</h2>
+            <h2>CodeCraft College</h2>
         </div>
 
         <nav class="nav-links">
@@ -461,9 +461,13 @@
                 <i class="fas fa-calendar-alt"></i>
                 Exams
             </a>
-            <a href="{% url 'core:manage_results' %}" class="nav-link {% if 'result' in request.resolver_match.url_name %}active{% endif %}">
-                <i class="fas fa-chart-bar"></i>
-                Results
+            <a href="{% url 'core:dynamic_result_form' %}" class="nav-link {% if request.resolver_match.url_name == 'dynamic_result_form' %}active{% endif %}">
+                <i class="fas fa-edit"></i>
+                Result Entry
+            </a>
+            <a href="{% url 'core:manage_subject_results' %}" class="nav-link {% if 'subject_result' in request.resolver_match.url_name or request.resolver_match.url_name == 'manage_results' %}active{% endif %}">
+                <i class="fas fa-list-check"></i>
+                Results List
             </a>
 
             <div class="nav-category">Others</div>

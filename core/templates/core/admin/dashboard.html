@@ -78,17 +78,7 @@
                 </div>
             </a>
 
-            <a href="{% url 'core:dynamic_result_form' %}"
-                style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; text-decoration: none; color: var(--text-main); transition: all 0.2s;">
-                <div
-                    style="background: rgba(239, 68, 68, 0.1); color: #EF4444; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
-                    <i class="fas fa-chart-line"></i>
-                </div>
-                <div>
-                    <h4 style="font-weight: 500; font-size: 0.95rem;">Enter Results</h4>
-                    <span style="color: var(--text-light); font-size: 0.8rem;">Dynamic result entry</span>
-                </div>
-            </a>
+
 
             <a href="{% url 'core:manage_timetable' %}"
                 style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; text-decoration: none; color: var(--text-main); transition: all 0.2s;">
@@ -122,9 +112,29 @@
                 </div>
                 <div>
                     <h4 style="font-weight: 500; font-size: 0.95rem;">Subject Results</h4>
-                    <span style="color: var(--text-light); font-size: 0.8rem;">Detailed marks entry</span>
+                    <span style="color: var(--text-light); font-size: 0.8rem;">View marks</span>
                 </div>
             </a>
+            
+            <a href="{% url 'core:dynamic_result_form' %}"
+                style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; text-decoration: none; color: var(--text-main); transition: all 0.2s;">
+                <div
+                    style="background: rgba(16, 185, 129, 0.1); color: #10B981; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <div>
+                    <h4 style="font-weight: 500; font-size: 0.95rem;">Add Result</h4>
+                    <span style="color: var(--text-light); font-size: 0.8rem;">Enter student marks</span>
+                </div>
+            </a>
+            <a href="{% url 'core:manage_events' %}"
+                style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 8px; text-decoration: none; color: var(--text-main); transition: all 0.2s;">
+                <div
+                    style="background: rgba(236, 72, 153, 0.1); color: #EC4899; width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+                    <i class="fas fa-image"></i>
+                </div>
+                <div>
+                    <h4 style="font-weight: 500; font-size: 0.95rem;">Manage Events</h4>
                     <span style="color: var(--text-light); font-size: 0.8rem;">Add to campus gallery</span>
                 </div>
             </a>
@@ -139,8 +149,7 @@
             <div style="background: #E5E7EB; width: 3px; border-radius: 3px;"></div>
             <div>
                 <h4 style="font-size: 0.95rem; color: var(--text-main);">{{ event.title }}</h4>
-                <p style="font-size: 0.8rem; color: var(--text-light);">{{ event.event_date|date:"F d, Y" }} &middot; {{
-                    event.venue|default:"No venue" }}</p>
+                <p style="font-size: 0.8rem; color: var(--text-light);">{{ event.event_date|date:"F d, Y" }} &middot; {{ event.venue|default:"No venue" }}</p>
             </div>
         </div>
         {% empty %}

@@ -23,21 +23,21 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Course)
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'category', 'duration')
+    list_display = ('course_name', 'code', 'category', 'duration')
     list_filter = ('category',)
-    search_fields = ('name', 'code')
+    search_fields = ('course_name', 'code')
 
 @admin.register(Semester)
 class SemesterAdmin(admin.ModelAdmin):
-    list_display = ('name', 'course')
-    list_filter = ('course',)
-    search_fields = ('name', 'course__name')
+    list_display = ('semester_name', 'stream')
+    list_filter = ('stream',)
+    search_fields = ('semester_name', 'stream__stream_name')
 
 @admin.register(Subject)
 class SubjectAdmin(admin.ModelAdmin):
-    list_display = ('name', 'code', 'semester', 'professor', 'credits')
-    list_filter = ('semester__course', 'professor')
-    search_fields = ('name', 'code', 'semester__name')
+    list_display = ('subject_name', 'code', 'semester', 'professor', 'credits')
+    list_filter = ('semester__stream__course', 'professor')
+    search_fields = ('subject_name', 'code', 'semester__semester_name')
 
 @admin.register(StudentProfile)
 class StudentProfileAdmin(admin.ModelAdmin):
@@ -136,14 +136,14 @@ class ProfessorProfileAdmin(admin.ModelAdmin):
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
     list_display = ('student', 'subject', 'date', 'status', 'marked_by')
-    list_filter = ('status', 'date', 'subject__semester__course')
-    search_fields = ('student__user__username', 'student__roll_number', 'subject__name')
+    list_filter = ('status', 'date', 'subject__semester__stream__course')
+    search_fields = ('student__user__username', 'student__roll_number', 'subject__subject_name')
 
 @admin.register(Assignment)
 class AssignmentAdmin(admin.ModelAdmin):
     list_display = ('title', 'subject', 'due_date', 'created_by', 'max_marks')
-    list_filter = ('subject__semester__course', 'due_date')
-    search_fields = ('title', 'subject__name')
+    list_filter = ('subject__semester__stream__course', 'due_date')
+    search_fields = ('title', 'subject__subject_name')
 
 @admin.register(ExamType)
 class ExamTypeAdmin(admin.ModelAdmin):
@@ -153,14 +153,14 @@ class ExamTypeAdmin(admin.ModelAdmin):
 @admin.register(ExamTimeTable)
 class ExamTimeTableAdmin(admin.ModelAdmin):
     list_display = ('name', 'semester', 'subject', 'exam_type', 'date', 'total_marks')
-    list_filter = ('exam_type', 'date', 'semester__course')
-    search_fields = ('name', 'subject__name', 'semester__name')
+    list_filter = ('exam_type', 'date', 'semester__stream__course')
+    search_fields = ('name', 'subject__subject_name', 'semester__semester_name')
 
 @admin.register(Result)
 class ResultAdmin(admin.ModelAdmin):
     list_display = ('student', 'exam', 'marks_obtained', 'grade')
     list_filter = ('exam__exam_type', 'grade', 'exam__date')
-    search_fields = ('student__user__username', 'student__roll_number', 'exam__subject__name')
+    search_fields = ('student__user__username', 'student__roll_number', 'exam__subject__subject_name')
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
@@ -226,8 +226,8 @@ class AdmissionEnquiryAdmin(admin.ModelAdmin):
 @admin.register(SubjectResult)
 class SubjectResultAdmin(admin.ModelAdmin):
     list_display = ('student', 'subject', 'total_marks', 'percentage', 'result_status')
-    list_filter = ('result_status', 'subject__semester__course', 'created_at')
-    search_fields = ('student__user__username', 'student__roll_number', 'subject__name')
+    list_filter = ('result_status', 'subject__semester__stream__course', 'created_at')
+    search_fields = ('student__user__username', 'student__roll_number', 'subject__subject_name')
     readonly_fields = ('total_marks', 'percentage', 'created_at')
 
     def changelist_view(self, request, extra_context=None):
@@ -350,3 +350,7 @@ class SubjectResultAdmin(admin.ModelAdmin):
             return JsonResponse({'success': True, 'message': 'Results saved successfully'})
 
         return JsonResponse({'success': False, 'message': 'Invalid request method'})
+
+admin.site.site_header = "SRMS Result"
+admin.site.site_title = "SRMS Result Admin Portal"
+admin.site.index_title = "Welcome to SRMS Result Portal"

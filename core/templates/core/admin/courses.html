@@ -15,10 +15,11 @@
         <thead>
             <tr>
                 <th>Course Name</th>
-                <th>Course Code</th>
+                <th>Course ID</th>
                 <th>Duration</th>
+                <th>Semester</th>
                 <th>Description</th>
-                <th>Created At</th>
+                <th>Created Date</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -27,8 +28,9 @@
             <tr>
                 <td style="font-weight: 500; color: var(--secondary);">{{ course.name }}</td>
                 <td><span
-                        style="background: #F3F4F6; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem;">{{ course.code }}</span></td>
+                        style="background: #F3F4F6; padding: 3px 8px; border-radius: 4px; font-family: monospace; font-size: 0.85rem;">{{ course.code|default:course.id }}</span></td>
                 <td>{{ course.duration }}</td>
+                <td>{{ course.total_semesters }}</td>
                 <td style="color: var(--text-light); font-size: 0.9rem;">{{ course.description|truncatechars:50 }}</td>
                 <td style="color: var(--text-light); font-size: 0.85rem;">{{ course.created_at|date:"M d, Y" }}</td>
                 <td>
@@ -65,17 +67,20 @@
 
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="form-group">
-                <label>Course Name</label>
-                <input type="text" name="name" class="form-control" required
-                    placeholder="e.g. Master of Computer Applications">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Course Name</label>
+                    <input type="text" name="name" class="form-control" required
+                        placeholder="e.g. Master of Computer Applications">
+                </div>
+                <div class="form-group">
+                    <label>Course Code (ID)</label>
+                    <input type="text" name="code" class="form-control" required
+                        placeholder="e.g. MCA">
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                <div class="form-group">
-                    <label>Course Code</label>
-                    <input type="text" name="code" class="form-control" required placeholder="e.g. MCA2024">
-                </div>
                 <div class="form-group">
                     <label>Category</label>
                     <select name="category" class="form-control" required>
@@ -89,7 +94,11 @@
                 </div>
                 <div class="form-group">
                     <label>Duration</label>
-                    <input type="text" name="duration" class="form-control" required placeholder="e.g. 2 Years">
+                    <input type="text" name="duration" class="form-control" required placeholder="e.g. 3 Years">
+                </div>
+                <div class="form-group">
+                    <label>Semester</label>
+                    <input type="number" name="total_semesters" class="form-control" required min="1" max="10" placeholder="e.g. 6">
                 </div>
             </div>
 
@@ -99,14 +108,14 @@
                     placeholder="Brief description of the course"></textarea>
             </div>
 
-            <div class="form-group">
-                <label>Course Image (Optional)</label>
-                <input type="file" name="image" class="form-control" accept="image/*">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button type="button" onclick="document.getElementById('addModal').style.display='none'" class="btn" style="flex: 1; justify-content: center; background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn btn-primary" style="flex: 1; justify-content: center;">
+                    <i class="fas fa-save"></i> Save Course
+                </button>
             </div>
-
-            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; margin-top: 10px;">
-                <i class="fas fa-save"></i> Save Course
-            </button>
         </form>
     </div>
 </div>

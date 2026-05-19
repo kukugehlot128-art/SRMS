@@ -1,6 +1,6 @@
 {% extends 'core/base.html' %}
 
-{% block title %}{{ course.name }} - Subjects - EduResult{% endblock %}
+{% block title %}{{ course.name }} - Subjects - CodeCraft College{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -114,7 +114,7 @@
                 {% if subject.image %}
                     <img src="{{ subject.image.url }}" alt="{{ subject.name }}" class="subject-img">
                 {% else %}
-                    <i class="fas fa-book-open subject-icon"></i>
+                    <img src="https://picsum.photos/seed/subject{{ subject.id }}/300/200" alt="{{ subject.name }}" class="subject-img">
                 {% endif %}
             </div>
             <div class="subject-body" style="display: flex; flex-direction: column;">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Professor Portal{% endblock %} - EduResult</title>
+    <title>{% block title %}Professor Portal{% endblock %} - CodeCraft College</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- FontAwesome -->
@@ -362,7 +362,7 @@
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-chalkboard-teacher"></i>
-            <h2>EduResult</h2>
+            <h2>CodeCraft College</h2>
         </div>
 
         <nav class="nav-links">
@@ -381,7 +381,7 @@
                 <i class="fas fa-users"></i>
                 Students
             </a>
-            <a href="{% url 'core:professor_attendance' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_attendance' %}active{% endif %}">
+            <a href="{% url 'core:professor_attendance' %}" class="nav-link {% if 'attendance' in request.resolver_match.url_name %}active{% endif %}">
                 <i class="fas fa-user-check"></i>
                 Attendance
             </a>
@@ -395,13 +395,17 @@
             </a>
             
             <div class="nav-category">Evaluation</div>
-            <a href="{% url 'core:professor_exams' %}" class="nav-link {% if 'exam' in request.resolver_match.url_name %}active{% endif %}">
+            <a href="{% url 'core:professor_exams' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_exams' %}active{% endif %}">
                 <i class="fas fa-calendar-alt"></i>
                 Exam Timetable
             </a>
-            <a href="{% url 'core:professor_results_list' %}" class="nav-link {% if 'result' in request.resolver_match.url_name or 'mark' in request.resolver_match.url_name %}active{% endif %}">
+            <a href="{% url 'core:professor_results_list' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_results_list' or request.resolver_match.url_name == 'add_marks' %}active{% endif %}">
                 <i class="fas fa-chart-bar"></i>
-                Results
+                Exam Results
+            </a>
+            <a href="{% url 'core:professor_dynamic_result' %}" class="nav-link {% if request.resolver_match.url_name == 'professor_dynamic_result' %}active{% endif %}">
+                <i class="fas fa-poll-h"></i>
+                Subject Results
             </a>
 
             <div class="nav-category">Others</div>

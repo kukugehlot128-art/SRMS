@@ -14,7 +14,7 @@
             <select name="subject" class="form-control" required>
                 <option value="">-- Choose Subject to view attendance --</option>
                 {% for subject in subjects %}
-                <option value="{{ subject.id }}" {% if request.GET.subject == subject.id|stringformat:"s" %}selected{% endif %}>{{ subject.code }} - {{ subject.name }}</option>
+                <option value="{{ subject.id }}" {% if request.GET.subject == subject.id|stringformat:'s' %}selected{% endif %}>{{ subject.code }} - {{ subject.subject_name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -33,8 +33,7 @@
     <div
         style="padding: 20px; background: #F9FAFB; border-bottom: 1px solid #E5E7EB; display: flex; justify-content: space-between; align-items: center;">
         <div>
-            <h3 style="color: var(--text-main); font-size: 1.2rem; margin-bottom: 5px;">{{ selected_subject.name }} ({{
-                selected_subject.code }})</h3>
+            <h3 style="color: var(--text-main); font-size: 1.2rem; margin-bottom: 5px;">{{ selected_subject.subject_name }} ({{ selected_subject.code }})</h3>
             <div style="color: var(--text-light); font-size: 0.9rem;">
                 <i class="fas fa-calendar-alt"></i> Attendance for {{ current_date|date:"F d, Y" }}
             </div>

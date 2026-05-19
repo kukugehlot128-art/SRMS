@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.db import models
 from .models import (
     Course, Subject, Event, Notification, ExamTimeTable, Result, StudentProfile,
-    User, Attendance, Assignment, Semester, ExamType, ProfessorProfile, AssignmentSubmission,
+    User, Attendance, Assignment, Stream, Semester, ExamType, ProfessorProfile, AssignmentSubmission,
     StudentResult, SubjectResult, ExamSchedule, Timetable, AdmissionEnquiry
 )
 import random
@@ -59,7 +59,7 @@ def admission(request):
 
 
 def courses_page(request):
-    courses = Course.objects.all().order_by('category', 'name')
+    courses = Course.objects.all().order_by('category', 'course_name')
     return render(request, 'core/courses.html', {'courses': courses})
 
 
@@ -107,7 +107,7 @@ def result_search(request):
         captcha_text = request.session['captcha_text']
 
     if request.method == 'POST':
-        roll_number = request.POST.get('roll_number')
+        roll_number = request.POST.get('roll_number', '').strip()
         captcha_input = request.POST.get('captcha_input')
         
         try:
@@ -119,54 +119,88 @@ def result_search(request):
             return redirect('core:result_search')
             
         if roll_number:
+            student = StudentProfile.objects.filter(roll_number__iexact=roll_number).first()
+            if not student:
+                messages.error(request, 'Result not found for this Roll Number.')
+                return redirect('core:result_search')
+            
             try:
-                student_result = StudentResult.objects.get(roll_number=roll_number)
                 
+                subject_results = SubjectResult.objects.filter(student=student, subject__semester=student.semester)
+                
+                if not subject_results.exists():
+                    messages.error(request, 'No results found for this student in their current semester.')
+                    return redirect('core:result_search')
+
                 subjects = []
                 total_max = 0
-                total_obt = student_result.total_marks
-                lines = student_result.subject_marks.strip().split('\n')
-                for i, line in enumerate(lines):
-                    if ':' in line:
-                        name, marks = line.split(':', 1)
-                        obt = int(marks.strip()) if marks.strip().isdigit() else 0
-                        max_mark = 100
-                        total_max += max_mark
-                        result_status = 'PASS' if obt >= 35 else 'FAIL'
-                        subjects.append({
-                            'code': f'SUB{i+1:03d}',
-                            'name': name.strip(),
-                            'max': max_mark,
-                            'obt': obt,
-                            'result': result_status
-                        })
+                total_obt = 0
+                overall_status = 'PASS'
+
+                for sr in subject_results:
+                    t_max = sr.theory_max
+                    p_max = sr.practical_max
+                    max_mark = t_max + p_max
+                    
+                    t_obt = sr.theory_marks
+                    p_obt = sr.practical_marks
+                    obt_mark = t_obt + p_obt
+
+                    total_max += max_mark
+                    total_obt += obt_mark
+                    
+                    if sr.result_status != 'Pass':
+                        overall_status = 'FAIL'
+
+                    subj_name = getattr(sr.subject, 'subject_name', None) or getattr(sr.subject, 'name', 'Unknown')
+                    
+                    subjects.append({
+                        'code': sr.subject.code,
+                        'name': subj_name,
+                        'theory_marks': t_obt,
+                        'theory_max': t_max,
+                        'practical_marks': p_obt,
+                        'practical_max': p_max,
+                        'internal_marks': sr.internal_marks,
+                        'obt': obt_mark,
+                        'max': max_mark,
+                        'result': 'PASS' if sr.result_status == 'Pass' else 'FAIL'
+                    })
                 
                 if total_max == 0:
                     total_max = 100
                     
                 percentage = round((total_obt / total_max) * 100, 2)
-                division = 'FIRST CLASS' if percentage >= 60 else 'SECOND CLASS' if percentage >= 45 else 'THIRD CLASS' if percentage >= 35 else 'FAIL'
+                if overall_status == 'FAIL':
+                    division = 'FAIL'
+                else:
+                    division = 'FIRST CLASS' if percentage >= 60 else 'SECOND CLASS' if percentage >= 45 else 'THIRD CLASS' if percentage >= 35 else 'FAIL'
                 
                 class DummyStudent:
                     pass
                 student_obj = DummyStudent()
-                student_obj.student_name = student_result.student_name
-                student_obj.roll_number = student_result.roll_number
-                student_obj.course_name = student_result.get_course_display()
-                student_obj.father_name = 'N/A'
+                student_obj.student_name = student.user.get_full_name()
+                student_obj.roll_number = student.roll_number
+                student_obj.course_name = student.course.course_name if student.course else 'N/A'
+                student_obj.father_name = getattr(student, 'father_name', 'N/A')
+                student_obj.enrollment_number = getattr(student, 'enrollment_number', 'N/A')
+                student_obj.semester_name = student.semester.semester_name if student.semester else 'N/A'
                 
+                exam_name = f"{student.semester.semester_name} Examination" if student.semester else "Examination"
+
                 return render(request, 'core/result_display.html', {
                     'student': student_obj,
-                    'exam_name': student_result.exam_name,
+                    'exam_name': exam_name,
                     'subjects': subjects,
                     'total_max': total_max,
                     'total_obt': total_obt,
                     'percentage': percentage,
                     'division': division,
-                    'overall_result': student_result.status,
+                    'overall_result': overall_status,
+                    'is_subject_result': True,
                 })
-            except StudentResult.DoesNotExist:
-                messages.error(request, 'Result not found for this Roll Number.')
+            except Exception as e:
+                messages.error(request, 'An error occurred while fetching the result.')
                 return redirect('core:result_search')
         else:
             messages.error(request, 'Please provide Roll Number.')
@@ -360,15 +394,15 @@ def manage_admissions(request):
 
 @admin_required
 def manage_streams(request):
-    streams = Semester.objects.select_related('course').all()
+    streams = Stream.objects.select_related('course').all()
     courses = Course.objects.all()
     
     if request.method == 'POST':
-        name = request.POST.get('name')
+        stream_name = request.POST.get('name')
         course_id = request.POST.get('course_id')
-        if name and course_id:
+        if stream_name and course_id:
             course = get_object_or_404(Course, pk=course_id)
-            Semester.objects.create(name=name, course=course)
+            Stream.objects.create(stream_name=stream_name, course=course)
             messages.success(request, 'Stream added successfully!')
             return redirect('core:manage_streams')
             
@@ -376,9 +410,9 @@ def manage_streams(request):
 
 @admin_required
 def update_stream(request, pk):
-    stream = get_object_or_404(Semester, pk=pk)
+    stream = get_object_or_404(Stream, pk=pk)
     if request.method == 'POST':
-        stream.name = request.POST.get('name')
+        stream.stream_name = request.POST.get('name')
         course_id = request.POST.get('course_id')
         if course_id:
             stream.course = get_object_or_404(Course, pk=course_id)
@@ -390,12 +424,51 @@ def update_stream(request, pk):
 
 @admin_required
 def delete_stream(request, pk):
-    stream = get_object_or_404(Semester, pk=pk)
+    stream = get_object_or_404(Stream, pk=pk)
     if request.method == 'POST':
         stream.delete()
         messages.success(request, 'Stream deleted successfully!')
         return redirect('core:manage_streams')
     return render(request, 'core/admin/confirm_delete.html', {'obj': stream, 'cancel_url': 'core:manage_streams'})
+
+@admin_required
+def manage_semesters(request):
+    semesters = Semester.objects.select_related('stream__course').all()
+    streams = Stream.objects.select_related('course').all()
+    
+    if request.method == 'POST':
+        semester_name = request.POST.get('name')
+        stream_id = request.POST.get('stream_id')
+        if semester_name and stream_id:
+            stream = get_object_or_404(Stream, pk=stream_id)
+            Semester.objects.create(semester_name=semester_name, stream=stream)
+            messages.success(request, 'Semester added successfully!')
+            return redirect('core:manage_semesters')
+            
+    return render(request, 'core/admin/semesters.html', {'semesters': semesters, 'streams': streams})
+
+@admin_required
+def update_semester(request, pk):
+    semester = get_object_or_404(Semester, pk=pk)
+    if request.method == 'POST':
+        semester.semester_name = request.POST.get('name')
+        stream_id = request.POST.get('stream_id')
+        if stream_id:
+            semester.stream = get_object_or_404(Stream, pk=stream_id)
+        semester.save()
+        messages.success(request, 'Semester updated successfully!')
+        return redirect('core:manage_semesters')
+    streams = Stream.objects.select_related('course').all()
+    return render(request, 'core/admin/semester_form.html', {'semester': semester, 'streams': streams})
+
+@admin_required
+def delete_semester(request, pk):
+    semester = get_object_or_404(Semester, pk=pk)
+    if request.method == 'POST':
+        semester.delete()
+        messages.success(request, 'Semester deleted successfully!')
+        return redirect('core:manage_semesters')
+    return render(request, 'core/admin/confirm_delete.html', {'obj': semester, 'cancel_url': 'core:manage_semesters'})
 
 @admin_required
 def manage_events(request):
@@ -761,8 +834,9 @@ def create_exam(request):
         
     subjects = Subject.objects.select_related('semester').all()
     exam_types = ExamType.objects.all()
-    streams = Semester.objects.select_related('course').all()
-    return render(request, 'core/admin/exam_form.html', {'subjects': subjects, 'exam_types': exam_types, 'streams': streams, 'is_update': False})
+    courses = Course.objects.all()
+    semesters = Semester.objects.select_related('stream__course').all()
+    return render(request, 'core/admin/exam_form.html', {'subjects': subjects, 'exam_types': exam_types, 'courses': courses, 'semesters': semesters, 'is_update': False})
 
 @admin_required
 def update_exam(request, pk):
@@ -800,8 +874,9 @@ def update_exam(request, pk):
         
     subjects = Subject.objects.select_related('semester').all()
     exam_types = ExamType.objects.all()
-    streams = Semester.objects.select_related('course').all()
-    return render(request, 'core/admin/exam_form.html', {'exam': exam, 'subjects': subjects, 'exam_types': exam_types, 'streams': streams, 'is_update': True})
+    courses = Course.objects.all()
+    semesters = Semester.objects.select_related('stream__course').all()
+    return render(request, 'core/admin/exam_form.html', {'exam': exam, 'subjects': subjects, 'exam_types': exam_types, 'courses': courses, 'semesters': semesters, 'is_update': True})
 
 @admin_required
 def delete_exam(request, pk):
@@ -1008,7 +1083,7 @@ from datetime import date as dt_date, datetime
 
 @admin_required
 def manage_attendance(request):
-    subjects = Subject.objects.all().order_by('semester', 'name')
+    subjects = Subject.objects.all().order_by('semester', 'subject_name')
     
     selected_subject = None
     students_attendance = []
@@ -1025,7 +1100,7 @@ def manage_attendance(request):
         selected_subject = get_object_or_404(Subject, pk=subject_id)
         
         # Get all enrolled students
-        enrolled_students = selected_subject.studentprofile_set.select_related('user', 'course').order_by('roll_number')
+        enrolled_students = StudentProfile.objects.filter(semester=selected_subject.semester).select_related('user', 'course').order_by('roll_number')
         
         # Get existing attendance records for the date
         existing_records = {
@@ -1069,7 +1144,7 @@ def save_attendance(request):
             messages.error(request, 'Cannot mark attendance for future dates.')
             return redirect('core:manage_attendance')
             
-        enrolled_students = subject.studentprofile_set.all()
+        enrolled_students = StudentProfile.objects.filter(semester=subject.semester)
         records_updated = 0
         records_created = 0
         
@@ -1596,35 +1671,49 @@ from django.http import JsonResponse
 @admin_required
 def ajax_get_semesters(request):
     course_id = request.GET.get('course_id')
-    if course_id:
-        semesters = Semester.objects.filter(course_id=course_id).values('id', 'name')
-        return JsonResponse(list(semesters), safe=False)
-    return JsonResponse([], safe=False)
+    stream_id = request.GET.get('stream_id')
+    semesters = Semester.objects.all()
+    if stream_id:
+        semesters = semesters.filter(stream_id=stream_id)
+    elif course_id:
+        semesters = semesters.filter(stream__course_id=course_id)
+    else:
+        return JsonResponse([], safe=False)
+        
+    sem_list = [{'id': s.id, 'name': s.semester_name} for s in semesters]
+    return JsonResponse(sem_list, safe=False)
 
 @admin_required
 def ajax_get_subjects(request):
     semester_id = request.GET.get('semester_id')
     if semester_id:
-        subjects = Subject.objects.filter(semester_id=semester_id).values('id', 'name', 'code')
-        return JsonResponse(list(subjects), safe=False)
+        subjects = Subject.objects.filter(semester_id=semester_id)
+        sub_list = [{'id': s.id, 'name': s.subject_name, 'code': s.code or ''} for s in subjects]
+        return JsonResponse(sub_list, safe=False)
     return JsonResponse([], safe=False)
 
 @admin_required
 def ajax_get_students(request):
     course_id = request.GET.get('course_id')
     semester_id = request.GET.get('semester_id')
-    if course_id and semester_id:
-        students = StudentProfile.objects.filter(
-            course_id=course_id, semester_id=semester_id
-        ).select_related('user').values('id', 'roll_number', name=models.F('user__first_name') + ' ' + models.F('user__last_name'))
-        student_list = []
-        for student in students:
-            student_list.append({
-                'id': student['id'],
-                'name': f"{student['roll_number']} - {student['name']}"
-            })
-        return JsonResponse(student_list, safe=False)
-    return JsonResponse([], safe=False)
+    admission_year_id = request.GET.get('admission_year')
+    
+    students = StudentProfile.objects.select_related('user').all()
+    if course_id:
+        students = students.filter(course_id=course_id)
+    if semester_id:
+        students = students.filter(semester_id=semester_id)
+    if admission_year_id:
+        students = students.filter(admission_year_id=admission_year_id)
+        
+    if not (course_id or semester_id or admission_year_id):
+        return JsonResponse([], safe=False)
+        
+    student_list = [{
+        'id': s.id,
+        'name': f"{s.roll_number} - {s.user.get_full_name()} ({s.admission_year.year if s.admission_year else 'N/A'})"
+    } for s in students]
+    return JsonResponse(student_list, safe=False)
 
 
 # ---- DYNAMIC RESULT FORM VIEW ----
@@ -1633,50 +1722,165 @@ def ajax_get_students(request):
 def dynamic_result_form(request):
     if request.method == 'POST':
         student_id = request.POST.get('student_id')
-        subject_id = request.POST.get('subject_id')
-        theory_max = request.POST.get('theory_max')
-        theory_min = request.POST.get('theory_min')
-        theory_marks = request.POST.get('theory_marks')
-        practical_max = request.POST.get('practical_max')
-        practical_min = request.POST.get('practical_min')
-        practical_marks = request.POST.get('practical_marks')
-        internal_marks = request.POST.get('internal_marks')
-        result_status = request.POST.get('result_status')
+        subject_ids = request.POST.getlist('subject_id')
+        theory_max_list = request.POST.getlist('theory_max')
+        theory_min_list = request.POST.getlist('theory_min')
+        theory_marks_list = request.POST.getlist('theory_marks')
+        practical_max_list = request.POST.getlist('practical_max')
+        practical_min_list = request.POST.getlist('practical_min')
+        practical_marks_list = request.POST.getlist('practical_marks')
+        internal_marks_list = request.POST.getlist('internal_marks')
+        result_status_list = request.POST.getlist('result_status')
         
         student = get_object_or_404(StudentProfile, pk=student_id)
-        subject = get_object_or_404(Subject, pk=subject_id)
         
-        # Create or update SubjectResult
-        subject_result, created = SubjectResult.objects.get_or_create(
-            student=student,
-            subject=subject,
-            defaults={
-                'theory_max': theory_max,
-                'theory_min': theory_min,
-                'theory_marks': theory_marks,
-                'practical_max': practical_max,
-                'practical_min': practical_min,
-                'practical_marks': practical_marks,
-                'internal_marks': internal_marks,
-                'result_status': result_status,
-            }
-        )
+        created_count = 0
+        updated_count = 0
+        saved_subject_names = []
+
+        for i, subj_id in enumerate(subject_ids):
+            subject = get_object_or_404(Subject, pk=subj_id)
+            saved_subject_names.append(subject.name if hasattr(subject, 'name') else subject.subject_name)
+            
+            # Convert string inputs to int, handling empty strings
+            t_max = int(theory_max_list[i]) if theory_max_list[i] else 0
+            t_min = int(theory_min_list[i]) if theory_min_list[i] else 0
+            t_marks = int(theory_marks_list[i]) if theory_marks_list[i] else 0
+            p_max = int(practical_max_list[i]) if practical_max_list[i] else 0
+            p_min = int(practical_min_list[i]) if practical_min_list[i] else 0
+            p_marks = int(practical_marks_list[i]) if practical_marks_list[i] else 0
+            i_marks = int(internal_marks_list[i]) if (i < len(internal_marks_list) and internal_marks_list[i]) else 0
+            
+            # Create or update SubjectResult
+            subject_result, created = SubjectResult.objects.get_or_create(
+                student=student,
+                subject=subject,
+                defaults={
+                    'theory_max': t_max,
+                    'theory_min': t_min,
+                    'theory_marks': t_marks,
+                    'practical_max': p_max,
+                    'practical_min': p_min,
+                    'practical_marks': p_marks,
+                    'internal_marks': i_marks,
+                    'result_status': result_status_list[i],
+                }
+            )
+            
+            if not created:
+                subject_result.theory_max = t_max
+                subject_result.theory_min = t_min
+                subject_result.theory_marks = t_marks
+                subject_result.practical_max = p_max
+                subject_result.practical_min = p_min
+                subject_result.practical_marks = p_marks
+                subject_result.internal_marks = i_marks
+                subject_result.result_status = result_status_list[i]
+                subject_result.save()
+                updated_count += 1
+            else:
+                created_count += 1
         
-        if not created:
-            subject_result.theory_max = theory_max
-            subject_result.theory_min = theory_min
-            subject_result.theory_marks = theory_marks
-            subject_result.practical_max = practical_max
-            subject_result.practical_min = practical_min
-            subject_result.practical_marks = practical_marks
-            subject_result.internal_marks = internal_marks
-            subject_result.result_status = result_status
-            subject_result.save()
-        
-        messages.success(request, f'Result {"created" if created else "updated"} successfully!')
+        subject_names_str = ", ".join(saved_subject_names)
+        messages.success(request, f'Results processed successfully for {len(saved_subject_names)} subjects: {subject_names_str}.')
         return redirect('core:dynamic_result_form')
     
     courses = Course.objects.all()
+    from .models import AdmissionYear
+    admission_years = AdmissionYear.objects.all().order_by('-year')
     return render(request, 'core/admin/dynamic_result_form.html', {
         'courses': courses,
+        'admission_years': admission_years,
     })
+
+
+# --- STUBS FOR MISSING VIEWS ---
+from django.http import HttpResponse, JsonResponse
+
+def prof_create_student(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def professor_attendance_list(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def prof_update_assignment(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def professor_ajax_get_semesters(request, *args, **kwargs):
+    return ajax_get_semesters(request)
+
+def ajax_get_student_results(request, *args, **kwargs):
+    student_id = request.GET.get('student_id')
+    subject_ids = request.GET.getlist('subject_ids[]')
+    if not student_id or not subject_ids:
+        return JsonResponse([], safe=False)
+    
+    results = SubjectResult.objects.filter(student_id=student_id, subject_id__in=subject_ids)
+    data = []
+    for r in results:
+        data.append({
+            'subject_id': r.subject_id,
+            'theory_max': r.theory_max,
+            'theory_min': r.theory_min,
+            'theory_marks': r.theory_marks,
+            'practical_max': r.practical_max,
+            'practical_min': r.practical_min,
+            'practical_marks': r.practical_marks,
+            'internal_marks': r.internal_marks,
+            'result_status': r.result_status
+        })
+    return JsonResponse(data, safe=False)
+
+def prof_create_event(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def prof_delete_event(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def prof_update_exam(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def ajax_get_streams(request, *args, **kwargs):
+    course_id = request.GET.get('course_id')
+    if course_id:
+        streams = Stream.objects.filter(course_id=course_id)
+        data = [{'id': s.id, 'name': s.stream_name} for s in streams]
+        return JsonResponse(data, safe=False)
+    return JsonResponse([], safe=False)
+
+def professor_ajax_get_student_results(request, *args, **kwargs):
+    return ajax_get_student_results(request)
+
+def prof_delete_assignment(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def ajax_save_marks(request, *args, **kwargs):
+    return JsonResponse({'status': 'success'}, safe=False)
+
+def prof_update_student(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def professor_ajax_get_subjects(request, *args, **kwargs):
+    return ajax_get_subjects(request)
+
+def prof_update_event(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def prof_delete_exam(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def api_subject_results(request, *args, **kwargs):
+    return JsonResponse({})
+
+def professor_dynamic_result(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def prof_update_notification(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def prof_delete_notification(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+
+def prof_delete_student(request, *args, **kwargs):
+    return HttpResponse('Not implemented')
+

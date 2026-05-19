@@ -1,99 +1,381 @@
 {% extends 'core/admin/base.html' %}
 
-{% block title %}Manage Subjects{% endblock %}
+{% block title %}Subject Management{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ── Table Wrapper ── */
+    .subjects-table-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 65vh;
+        border-radius: 0 0 12px 12px;
+    }
+
+    .subjects-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .subjects-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #F8FAFC;
+        color: #6B7280;
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        padding: 12px 16px;
+        border-bottom: 1px solid #E5E7EB;
+        white-space: nowrap;
+    }
+
+    .subjects-table tbody td {
+        padding: 13px 16px;
+        border-bottom: 1px solid #F3F4F6;
+        vertical-align: middle;
+        color: var(--text-main);
+    }
+
+    .subjects-table tbody tr:last-child td { border-bottom: none; }
+    .subjects-table tbody tr:hover { background: #F9FAFB; }
+
+    /* Column widths */
+    .col-subject  { width: 240px; min-width: 200px; }
+    .col-course   { width: 190px; min-width: 160px; }
+    .col-stream   { width: 110px; min-width: 90px; }
+    .col-semester { width: 120px; min-width: 100px; }
+    .col-credits  { width: 80px;  text-align: center; }
+    .col-prof     { width: 180px; min-width: 150px; }
+    .col-actions  { width: 110px; min-width: 100px; text-align: center; }
+
+    /* Subject cell */
+    .subject-name {
+        font-weight: 600;
+        color: var(--text-main);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 220px;
+    }
+    .subject-code {
+        display: inline-block;
+        margin-top: 4px;
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem;
+        color: #6B7280;
+        background: #F3F4F6;
+        padding: 2px 7px;
+        border-radius: 4px;
+    }
+
+    /* Course one-liner */
+    .course-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 185px;
+        color: var(--text-light);
+        font-weight: 500;
+        font-size: 0.82rem;
+    }
+
+    /* Semester badge */
+    .sem-badge {
+        display: inline-block;
+        background: rgba(139, 92, 246, 0.1);
+        color: #7C3AED;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Professor badge */
+    .prof-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.83rem;
+        color: var(--text-main);
+    }
+    .prof-badge i { color: #9CA3AF; font-size: 0.8rem; }
+
+    /* Not assigned badge */
+    .not-assigned {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: #FEF2F2;
+        color: #DC2626;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border: 1px solid #FECACA;
+    }
+
+    /* Action buttons */
+    .action-btns {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        align-items: center;
+    }
+    .btn-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 0.8rem;
+        transition: opacity 0.15s, transform 0.15s;
+        flex-shrink: 0;
+    }
+    .btn-icon:hover { opacity: 0.85; transform: scale(1.08); }
+    .btn-edit   { background: #EEF2FF; color: #4F46E5; border: 1px solid #C7D2FE; }
+    .btn-delete { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }
+
+    /* Credits center */
+    .credits-val {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #F3F4F6;
+        font-weight: 700;
+        font-size: 0.85rem;
+        color: var(--text-main);
+    }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-light);
+    }
+    .empty-state i {
+        font-size: 2.5rem;
+        margin-bottom: 12px;
+        display: block;
+        color: #D1D5DB;
+    }
+
+    /* Stats bar */
+    .stats-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+    }
+    .stat-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--card-bg);
+        border: 1px solid #E5E7EB;
+        border-radius: 8px;
+        padding: 6px 14px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    .stat-chip i { color: var(--primary); }
+
+    /* Modal */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.45);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .modal-box {
+        background: var(--card-bg);
+        border-radius: 14px;
+        width: 100%;
+        max-width: 580px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 28px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 14px;
+        border-bottom: 1px solid #E5E7EB;
+    }
+    .modal-header h3 { margin: 0; font-size: 1.1rem; color: var(--text-main); }
+    .modal-close {
+        background: none;
+        border: none;
+        font-size: 1.4rem;
+        cursor: pointer;
+        color: var(--text-light);
+        line-height: 1;
+        padding: 0 4px;
+    }
+    .modal-close:hover { color: var(--text-main); }
+    .form-row { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; }
+    .section-divider {
+        border: none;
+        border-top: 1px dashed #E5E7EB;
+        margin: 16px 0;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="page-title">
-    <h2>Subject Management & Faculty Allotment</h2>
+    <h2><i class="fas fa-book" style="color: var(--primary); margin-right: 10px;"></i>Subject Management</h2>
     <button onclick="document.getElementById('addModal').style.display='flex'" class="btn">
         <i class="fas fa-plus"></i> Add Subject
     </button>
 </div>
 
-<div class="card" style="padding: 0; overflow: hidden;">
-    <table class="admin-table">
-        <thead>
-            <tr>
-                <th>Subject Info</th>
-                <th>Course</th>
-                <th>Stream</th>
-                <th>Credits</th>
-                <th>Assigned Professor</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for subject in subjects %}
-            <tr>
-                <td>
-                    <div style="font-weight: 500; color: var(--text-main);">{{ subject.name }}</div>
-                    <div
-                        style="font-family: monospace; font-size: 0.8rem; color: var(--text-light); margin-top: 3px; background: #F3F4F6; display: inline-block; padding: 2px 6px; border-radius: 4px;">
-                        {{ subject.code }}</div>
-                </td>
-                <td style="color: var(--text-light);">{{ subject.semester.course.code }}</td>
-                <td><span
-                        style="background: rgba(139, 92, 246, 0.1); color: #8B5CF6; padding: 3px 8px; border-radius: 20px; font-size: 0.85rem; font-weight: 500;">
-                        {{ subject.semester.name }}</span></td>
-                <td style="font-weight: 600;">{{ subject.credits }}</td>
-                <td>
-                    {% if subject.professor %}
-                    <span style="display: inline-flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-user-tie text-light" style="color: #9CA3AF;"></i> {{ subject.professor.get_full_name|default:subject.professor.username }}
-                    </span>
-                    {% else %}
-                    <span
-                        style="color: #EF4444; font-size: 0.85rem; background: #FEE2E2; padding: 3px 8px; border-radius: 4px;"><i
-                            class="fas fa-exclamation-circle"></i> Not Assigned</span>
-                    {% endif %}
-                </td>
-                <td>
-                    <div style="display: flex; gap: 5px;">
-                        <a href="{% url 'core:update_subject' subject.id %}" class="btn"
-                            style="padding: 5px 10px; font-size: 0.85rem; background: #4F46E5; color: white;"><i
-                                class="fas fa-edit"></i></a>
-                        <a href="{% url 'core:delete_subject' subject.id %}" class="btn"
-                            style="padding: 5px 10px; font-size: 0.85rem; background: #EF4444; color: white;"><i
-                                class="fas fa-trash"></i></a>
-                    </div>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-light);">No subjects found.
-                    Add a subject and assign a professor.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<!-- Stats Bar -->
+{% with total=subjects|length %}
+{% with unassigned_count=0 %}
+<div class="stats-bar">
+    <div class="stat-chip"><i class="fas fa-book"></i> Total Subjects: {{ total }}</div>
+    <div class="stat-chip" style="color:#DC2626; border-color:#FECACA;">
+        <i class="fas fa-exclamation-circle" style="color:#DC2626;"></i>
+        Unassigned: {% for s in subjects %}{% if not s.professor %}{% if forloop.counter %}{% endif %}{% endif %}{% endfor %}
+        {{ subjects|length }}
+    </div>
+</div>
+{% endwith %}
+{% endwith %}
+
+<!-- Table Card -->
+<div class="card" style="padding: 0; overflow: hidden; border-radius: 12px;">
+    <div class="subjects-table-wrapper">
+        <table class="subjects-table">
+            <thead>
+                <tr>
+                    <th class="col-subject">Subject Info</th>
+                    <th class="col-course">Course</th>
+                    <th class="col-stream">Stream</th>
+                    <th class="col-semester">Semester</th>
+                    <th class="col-credits">Credits</th>
+                    <th class="col-prof">Assigned Professor</th>
+                    <th class="col-actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subject in subjects %}
+                <tr>
+                    <!-- Subject Info -->
+                    <td class="col-subject">
+                        <div class="subject-name" title="{{ subject.name }}">{{ subject.name }}</div>
+                        {% if subject.code %}
+                        <div class="subject-code">{{ subject.code }}</div>
+                        {% endif %}
+                    </td>
+
+                    <!-- Course -->
+                    <td class="col-course">
+                        <div class="course-text" title="{{ subject.semester.stream.course.name }}">
+                            {{ subject.semester.stream.course.name }}
+                        </div>
+                    </td>
+
+                    <!-- Stream -->
+                    <td class="col-stream" style="color: var(--text-light); font-size: 0.83rem;">
+                        {{ subject.semester.stream.name }}
+                    </td>
+
+                    <!-- Semester -->
+                    <td class="col-semester">
+                        <span class="sem-badge">{{ subject.semester.name }}</span>
+                    </td>
+
+                    <!-- Credits -->
+                    <td class="col-credits">
+                        <span class="credits-val">{{ subject.credits }}</span>
+                    </td>
+
+                    <!-- Professor -->
+                    <td class="col-prof">
+                        {% if subject.professor %}
+                        <span class="prof-badge">
+                            <i class="fas fa-user-tie"></i>
+                            {{ subject.professor.get_full_name|default:subject.professor.username }}
+                        </span>
+                        {% else %}
+                        <span class="not-assigned">
+                            <i class="fas fa-exclamation-circle"></i> Not Assigned
+                        </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="col-actions">
+                        <div class="action-btns">
+                            <a href="{% url 'core:update_subject' subject.id %}" class="btn-icon btn-edit" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'core:delete_subject' subject.id %}" class="btn-icon btn-delete" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="fas fa-book-open"></i>
+                            No subjects found. Click <strong>Add Subject</strong> to get started.
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Add Subject Modal -->
-<div id="addModal"
-    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center;">
-    <div class="card" style="width: 100%; max-width: 600px; padding: 30px;">
-        <div
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
-            <h3 style="color: var(--text-main);">Create New Subject</h3>
-            <button type="button" onclick="document.getElementById('addModal').style.display='none'"
-                style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light);">&times;</button>
+<div id="addModal" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus-circle" style="color: var(--primary);"></i> &nbsp;Create New Subject</h3>
+            <button type="button" class="modal-close" onclick="document.getElementById('addModal').style.display='none'">&times;</button>
         </div>
 
         <form method="POST">
             {% csrf_token %}
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 15px;">
+
+            <div class="form-row">
                 <div class="form-group">
-                    <label>Subject Name</label>
-                    <input type="text" name="name" class="form-control" required>
+                    <label>Subject Name <span style="color:#EF4444">*</span></label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Data Structures" required>
                 </div>
                 <div class="form-group">
-                    <label>Subject Code</label>
-                    <input type="text" name="code" class="form-control" required>
+                    <label>Subject Code <span style="color:#EF4444">*</span></label>
+                    <input type="text" name="code" class="form-control" placeholder="e.g. CS201" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Course</label>
+                <label>Course <span style="color:#EF4444">*</span></label>
                 <select id="course_dropdown" class="form-control" required onchange="filterStreams()">
                     <option value="">-- Select Course --</option>
                     {% for course in courses %}
@@ -101,57 +383,82 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
             <div class="form-group">
-                <label>Stream</label>
-                <select id="stream_dropdown" name="semester_id" class="form-control" required>
-                    <option value="">-- Select Stream --</option>
-                    {% for semester in semesters %}
-                    <option value="{{ semester.id }}" data-course="{{ semester.course.id }}">{{ semester.name }}</option>
+                <label>Stream <span style="color:#EF4444">*</span></label>
+                <select id="stream_dropdown" class="form-control" required onchange="filterSemesters()">
+                    <option value="">-- Select Course First --</option>
+                    {% for stream in streams %}
+                    <option value="{{ stream.id }}" data-course="{{ stream.course.id }}">{{ stream.name }}</option>
                     {% endfor %}
                 </select>
             </div>
-            
-            <script>
-                function filterStreams() {
-                    const courseId = document.getElementById('course_dropdown').value;
-                    const streamSelect = document.getElementById('stream_dropdown');
-                    const options = streamSelect.options;
 
-                    for (let i = 1; i < options.length; i++) {
-                        const option = options[i];
-                        if (option.getAttribute('data-course') === courseId) {
-                            option.style.display = 'block';
-                        } else {
-                            option.style.display = 'none';
-                        }
-                    }
-                    streamSelect.value = "";
-                }
-            </script>
+            <div class="form-group">
+                <label>Semester <span style="color:#EF4444">*</span></label>
+                <select id="semester_dropdown" name="semester_id" class="form-control" required>
+                    <option value="">-- Select Stream First --</option>
+                    {% for semester in semesters %}
+                    <option value="{{ semester.id }}" data-stream="{{ semester.stream.id }}">{{ semester.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
 
             <div class="form-group">
                 <label>Credits</label>
-                <input type="number" name="credits" class="form-control" min="1" max="10" value="3" required>
+                <input type="number" name="credits" class="form-control" min="1" max="10" value="3">
             </div>
 
-            <div class="form-group" style="padding-top: 15px; border-top: 1px dashed #E5E7EB; margin-top: 15px;">
-                <label style="color: var(--secondary);"><i class="fas fa-chalkboard-teacher"></i> Assign Professor
-                    (Optional)</label>
+            <hr class="section-divider">
+
+            <div class="form-group">
+                <label style="color: var(--secondary);">
+                    <i class="fas fa-chalkboard-teacher"></i> Assign Professor
+                    <span style="font-size:0.8rem; color: var(--text-light); font-weight: 400;">(Optional)</span>
+                </label>
                 <select name="professor_id" class="form-control">
                     <option value="">-- Leave Unassigned --</option>
                     {% for prof in professors %}
                     <option value="{{ prof.id }}">{{ prof.get_full_name|default:prof.username }}</option>
                     {% endfor %}
                 </select>
-                <small style="color: var(--text-light); margin-top: 5px; display: block;">You can assign a professor
-                    later.</small>
+                <small style="color: var(--text-light); margin-top: 5px; display: block;">You can assign a professor later from the edit page.</small>
             </div>
 
-            <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 15px;">
-                Save Subject
+            <button type="submit" class="btn" style="width: 100%; justify-content: center; margin-top: 16px; padding: 12px;">
+                <i class="fas fa-save"></i> &nbsp;Save Subject
             </button>
         </form>
     </div>
 </div>
+
+<script>
+    function filterStreams() {
+        const courseId = document.getElementById('course_dropdown').value;
+        const streamSelect = document.getElementById('stream_dropdown');
+        const opts = streamSelect.options;
+
+        streamSelect.value = "";
+        for (let i = 1; i < opts.length; i++) {
+            opts[i].style.display = opts[i].getAttribute('data-course') === courseId ? '' : 'none';
+        }
+        filterSemesters();
+    }
+
+    function filterSemesters() {
+        const streamId = document.getElementById('stream_dropdown').value;
+        const semSelect = document.getElementById('semester_dropdown');
+        const opts = semSelect.options;
+
+        semSelect.value = "";
+        for (let i = 1; i < opts.length; i++) {
+            opts[i].style.display = opts[i].getAttribute('data-stream') === streamId ? '' : 'none';
+        }
+    }
+
+    // Close modal on overlay click
+    document.getElementById('addModal').addEventListener('click', function(e) {
+        if (e.target === this) this.style.display = 'none';
+    });
+</script>
 {% endblock %}

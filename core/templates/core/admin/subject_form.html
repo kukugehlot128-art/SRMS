@@ -37,9 +37,18 @@
 
         <div class="form-group">
             <label>Stream</label>
-            <select id="stream_dropdown" name="semester_id" class="form-control" required>
+            <select id="stream_dropdown" class="form-control" required onchange="filterSemesters()">
+                {% for stream in streams %}
+                <option value="{{ stream.id }}" data-course="{{ stream.course.id }}" {% if subject.semester.stream.id == stream.id %}selected{% endif %}>{{ stream.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Semester</label>
+            <select id="semester_dropdown" name="semester_id" class="form-control" required>
                 {% for semester in semesters %}
-                <option value="{{ semester.id }}" data-course="{{ semester.course.id }}" {% if subject.semester.id == semester.id %}selected{% endif %}>{{ semester.name }}</option>
+                <option value="{{ semester.id }}" data-stream="{{ semester.stream.id }}" {% if subject.semester.id == semester.id %}selected{% endif %}>{{ semester.name }}</option>
                 {% endfor %}
             </select>
         </div>
@@ -65,8 +74,29 @@
                     streamSelect.options[streamSelect.selectedIndex].style.display === 'none') {
                     streamSelect.value = "";
                 }
+                filterSemesters();
             }
-            document.addEventListener('DOMContentLoaded', filterStreams);
+
+            function filterSemesters() {
+                const streamId = document.getElementById('stream_dropdown').value;
+                const semSelect = document.getElementById('semester_dropdown');
+                const options = semSelect.options;
+
+                for (let i = 0; i < options.length; i++) {
+                    const option = options[i];
+                    if (option.getAttribute('data-stream') === streamId) {
+                        option.style.display = 'block';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                }
+                
+                if (semSelect.options[semSelect.selectedIndex] && 
+                    semSelect.options[semSelect.selectedIndex].style.display === 'none') {
+                    semSelect.value = "";
+                }
+            }
+            document.addEventListener('DOMContentLoaded', () => { filterStreams(); filterSemesters(); });
         </script>
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">

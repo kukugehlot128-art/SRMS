@@ -19,6 +19,7 @@
     <table class="admin-table" style="width: 100%; border-collapse: collapse; text-align: left;">
         <thead style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
             <tr>
+                <th style="padding: 15px 20px; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">Timetable ID</th>
                 <th style="padding: 15px 20px; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">Course / Stream</th>
                 <th style="padding: 15px 20px; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">Exam Type</th>
                 <th style="padding: 15px 20px; color: #475569; font-weight: 600; text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.5px;">Subject</th>
@@ -30,6 +31,11 @@
         <tbody>
             {% for exam in exams %}
             <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='';">
+                <td style="padding: 15px 20px;">
+                    <div style="font-weight: 600; font-family: monospace; color: #4F46E5; font-size: 0.95rem;">
+                        {{ exam.name|default:"-" }}
+                    </div>
+                </td>
                 <td style="padding: 15px 20px;">
                     <span style="background: rgba(37, 99, 235, 0.1); color: #2563eb; padding: 5px 12px; border-radius: 6px; font-weight: 600; font-size: 0.85rem; display: inline-block;">
                         {{ exam.subject.semester.course.code }} ({{ exam.semester.name }})
@@ -72,7 +78,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
+                <td colspan="7" style="text-align: center; padding: 60px 20px; color: #94a3b8;">
                     <i class="fas fa-calendar-times" style="font-size: 3.5rem; margin-bottom: 20px; opacity: 0.4; color: #cbd5e1;"></i><br>
                     <span style="font-size: 1.1rem; font-weight: 500;">No exams scheduled currently.</span>
                 </td>

@@ -32,10 +32,8 @@
                 </td>
                 <td>
                     <span
-                        style="background: rgba(37, 99, 235, 0.1); color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">{{
-                        assignment.subject.code }}</span>
-                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px;">{{
-                        assignment.subject.name|truncatechars:20 }}</div>
+                        style="background: rgba(37, 99, 235, 0.1); color: var(--secondary); padding: 3px 8px; border-radius: 4px; font-weight: 600; font-size: 0.85rem;">{{ assignment.subject.code }}</span>
+                    <div style="font-size: 0.85rem; color: var(--text-light); margin-top: 3px;">{{ assignment.subject.name|truncatechars:20 }}</div>
                 </td>
                 <td
                     style="color: {% if assignment.due_date < today %}#EF4444{% else %}var(--text-main){% endif %}; font-weight: 500;">

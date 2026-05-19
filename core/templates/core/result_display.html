@@ -13,17 +13,21 @@
     }
     .marks-table th, .marks-table td {
         border: 1px solid #cbd5e1;
-        padding: 10px 15px;
+        padding: 8px 12px;
         text-align: center;
+        font-size: 14px;
     }
     .marks-table th { background-color: #f1f5f9; font-weight: 700; color: #0f172a; }
     .marks-table td { color: #334155; }
     .student-details td { padding: 6px 15px 6px 0; color: #1e293b; }
     .student-details td:nth-child(odd) { font-weight: 700; color: #475569; }
+    .marks-table td.pass-cell { color: #16a34a; font-weight: 700; }
+    .marks-table td.fail-cell { color: #dc2626; font-weight: 700; }
+    .sub-mark { font-size: 11px; color: #94a3b8; }
 </style>
 
-<div class="result-marksheet" style="max-width: 900px; margin: 3rem auto; background: white; border: 2px solid #0d47a1; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif;">
-    
+<div class="result-marksheet" style="max-width: 960px; margin: 3rem auto; background: white; border: 2px solid #0d47a1; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); font-family: 'Times New Roman', Times, serif;">
+
     <div class="no-print" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px;">
         <button onclick="window.print()" style="background: #0d47a1; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-family: Arial, sans-serif; font-weight: bold; transition: 0.3s;" onmouseover="this.style.background='#1e3a8a'" onmouseout="this.style.background='#0d47a1'">
             <i class="fas fa-print"></i> Print Marksheet
@@ -33,23 +37,23 @@
         </a>
     </div>
 
-    <!-- Header Section -->
+    <!-- Header -->
     <div style="text-align: center; border-bottom: 2px solid #0d47a1; padding-bottom: 20px; margin-bottom: 25px;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
             <div style="width: 80px; height: 80px; background-color: transparent; border: 2px solid #0d47a1; border-radius: 50%; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                 <img src="https://cdn-icons-png.flaticon.com/512/8074/8074804.png" alt="University Logo" style="width: 60px; height: 60px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/8074/8074804.png" alt="University Logo" style="width: 60px; height: 60px;">
             </div>
             <div>
-                <h1 style="margin: 0; font-size: 32px; color: #0d47a1; font-weight: 800; letter-spacing: 1px;">CODECRAFT UNIVERSITY</h1>
-                <p style="margin: 5px 0 0; font-size: 16px; font-style: italic; color: #334155;">(A State University Established by Govt. Act)</p>
+                <h1 style="margin: 0; font-size: 30px; color: #0d47a1; font-weight: 800; letter-spacing: 1px;">CODECRAFT UNIVERSITY</h1>
+                <p style="margin: 5px 0 0; font-size: 15px; font-style: italic; color: #334155;">(A State University Established by Govt. Act)</p>
             </div>
         </div>
-        <h2 style="margin: 20px 0 0; font-size: 22px; font-weight: bold; letter-spacing: 1.5px; text-decoration: underline; color: #1e293b;">STATEMENT OF MARKS</h2>
-        <h3 style="margin: 10px 0 0; font-size: 16px; font-weight: bold; text-transform: uppercase;">EXAMINATION: {{ exam_name|default:"SEMESTER EXAMINATION" }}</h3>
+        <h2 style="margin: 20px 0 0; font-size: 20px; font-weight: bold; letter-spacing: 1.5px; text-decoration: underline; color: #1e293b;">STATEMENT OF MARKS</h2>
+        <h3 style="margin: 10px 0 0; font-size: 15px; font-weight: bold; text-transform: uppercase;">EXAMINATION: {{ exam_name|default:"SEMESTER EXAMINATION" }}</h3>
     </div>
 
     <!-- Student Info -->
-    <table class="student-details" style="width: 100%; margin-bottom: 30px; font-size: 16px; line-height: 1.5;">
+    <table class="student-details" style="width: 100%; margin-bottom: 30px; font-size: 15px; line-height: 1.6;">
         <tr>
             <td style="width: 20%;">Student Name</td>
             <td style="width: 30%;">: <span style="text-transform: uppercase; font-weight: bold;">{{ student.student_name }}</span></td>
@@ -62,6 +66,14 @@
             <td>Course</td>
             <td>: <span style="font-weight: bold;">{{ student.course_name }}</span></td>
         </tr>
+        {% if is_subject_result %}
+        <tr>
+            <td>Enrollment No.</td>
+            <td>: <strong>{{ student.enrollment_number }}</strong></td>
+            <td>Semester</td>
+            <td>: <strong>{{ student.semester_name }}</strong></td>
+        </tr>
+        {% endif %}
         <tr>
             <td>Institution</td>
             <td colspan="3">: University Main Campus / Affiliated Colleges</td>
@@ -69,7 +81,42 @@
     </table>
 
     <!-- Marks Table -->
-    <table class="marks-table" style="width: 100%; border-collapse: collapse; margin-bottom: 35px; font-size: 16px;">
+    {% if is_subject_result %}
+    <!-- ── Detailed breakdown for SubjectResult (admin dynamic marks entry) ── -->
+    <table class="marks-table" style="width: 100%; border-collapse: collapse; margin-bottom: 35px;">
+        <thead>
+            <tr style="border-bottom: 2px solid #0d47a1; border-top: 2px solid #0d47a1;">
+                <th style="text-align:left; width:6%;">Code</th>
+                <th style="text-align:left; width:30%;">Subject Name</th>
+                <th>Theory<br><span class="sub-mark">Max | Obt</span></th>
+                <th>Practical<br><span class="sub-mark">Max | Obt</span></th>
+                <th>Total<br><span class="sub-mark">Max | Obt</span></th>
+                <th>Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for sub in subjects %}
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td style="font-family: monospace; font-size: 12px; font-weight: bold; text-align:left;">{{ sub.code }}</td>
+                <td style="text-align: left; font-weight: 500;">{{ sub.name }}</td>
+                <td>{{ sub.theory_marks }}<span style="color:#94a3b8;">/{{ sub.theory_max }}</span></td>
+                <td>{{ sub.practical_marks }}<span style="color:#94a3b8;">/{{ sub.practical_max }}</span></td>
+                <td><strong>{{ sub.obt }}</strong><span style="color:#94a3b8;">/{{ sub.max }}</span></td>
+                <td class="{% if sub.result == 'PASS' %}pass-cell{% else %}fail-cell{% endif %}">
+                    {% if sub.result == 'PASS' %}✔ PASS{% else %}✘ FAIL{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            <tr style="background-color: #f8fafc; font-weight: bold; border-top: 2px solid #0d47a1;">
+                <td colspan="4" style="text-align: right; padding-right: 15px; font-size: 15px;">GRAND TOTAL</td>
+                <td style="font-size: 16px; color: #0d47a1;">{{ total_obt }}<span style="color:#94a3b8; font-weight:400;">/{{ total_max }}</span></td>
+                <td>—</td>
+            </tr>
+        </tbody>
+    </table>
+    {% else %}
+    <!-- ── Simple format for legacy StudentResult ── -->
+    <table class="marks-table" style="width: 100%; border-collapse: collapse; margin-bottom: 35px; font-size: 15px;">
         <thead>
             <tr style="border-bottom: 2px solid #0d47a1; border-top: 2px solid #0d47a1;">
                 <th>Subject Code</th>
@@ -86,9 +133,7 @@
                 <td style="text-align: left; font-weight: normal;">{{ sub.name }}</td>
                 <td>{{ sub.max }}</td>
                 <td><strong>{{ sub.obt }}</strong></td>
-                <td style="color: {% if sub.result == 'PASS' %}#16a34a{% else %}#dc2626{% endif %}; font-weight: bold;">
-                    {{ sub.result }}
-                </td>
+                <td class="{% if sub.result == 'PASS' %}pass-cell{% else %}fail-cell{% endif %}">{{ sub.result }}</td>
             </tr>
             {% endfor %}
             <tr style="background-color: #f8fafc; font-weight: bold; border-top: 2px solid #0d47a1;">
@@ -99,22 +144,29 @@
             </tr>
         </tbody>
     </table>
+    {% endif %}
 
     <!-- Final Result Summary -->
-    <div style="border: 2px solid #0d47a1; background: #f8fafc; padding: 20px; font-size: 16px; font-weight: bold; margin-bottom: 50px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+    <div style="border: 2px solid #0d47a1; background: #f8fafc; padding: 18px 22px; font-size: 15px; font-weight: bold; margin-bottom: 50px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
             <span>TOTAL: <span style="font-size: 18px; color: #0d47a1;">{{ total_obt }} / {{ total_max }}</span></span>
             <span>PERCENTAGE: <span style="font-size: 18px; color: #0d47a1;">{{ percentage }}%</span></span>
-            <span>DIVISION: <span style="font-size: 18px; color: #0d47a1; text-transform: uppercase;">{{ division }}</span></span>
-            <span>RESULT: <span style="font-size: 20px; padding: 6px 16px; border-radius: 4px; display: inline-block; background: {% if overall_result == 'PASS' %}#16a34a; color: white{% else %}#ef4444; color: white{% endif %}; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">{{ overall_result }}</span></span>
+            <span>DIVISION: <span style="font-size: 17px; color: #0d47a1; text-transform: uppercase;">{{ division }}</span></span>
+            <span>RESULT:
+                <span style="font-size: 18px; padding: 5px 18px; border-radius: 4px; display: inline-block;
+                    background: {% if overall_result == 'PASS' %}#16a34a{% else %}#ef4444{% endif %}; color: white;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.15);">
+                    {{ overall_result }}
+                </span>
+            </span>
         </div>
     </div>
 
     <!-- Signatures -->
-    <div style="display: flex; justify-content: space-between; margin-top: 60px; font-size: 16px; color: #475569;">
+    <div style="display: flex; justify-content: space-between; margin-top: 60px; font-size: 15px; color: #475569;">
         <div style="text-align: center;">
             <p style="margin: 0;">_______________________</p>
-            <p style="margin-top: 5px; font-weight: bold;">Date & Seal</p>
+            <p style="margin-top: 5px; font-weight: bold;">Date &amp; Seal</p>
         </div>
         <div style="text-align: center;">
             <img src="https://upload.wikimedia.org/wikipedia/commons/f/f6/Signature_Placeholder.svg" style="height: 40px; margin-bottom: -15px; opacity: 0.6;" alt="Signature">

@@ -61,6 +61,7 @@
                 <th>Message</th>
                 <th>Sent Target</th>
                 <th>Date Sent</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -102,10 +103,16 @@
                     {{ notif.created_at|date:"M d, Y" }} <br>
                     <small>{{ notif.created_at|time:"H:i A" }}</small>
                 </td>
+                <td>
+                    <div style="display: flex; gap: 8px;">
+                        <a href="{% url 'core:prof_update_notification' notif.id %}" class="btn" style="background: #EBF5FF; color: #3B82F6; padding: 6px 12px; font-size: 0.85rem;"><i class="fas fa-edit"></i> Edit</a>
+                        <a href="{% url 'core:prof_delete_notification' notif.id %}" class="btn" style="background: #FEF2F2; color: #EF4444; padding: 6px 12px; font-size: 0.85rem;"><i class="fas fa-trash-alt"></i></a>
+                    </div>
+                </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-light);">
+                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-light);">
                     <i class="fas fa-bell-slash" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
                     You haven't sent any notifications yet.
                 </td>

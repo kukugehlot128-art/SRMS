@@ -2,212 +2,915 @@
 
 {% block title %}Dynamic Result Entry{% endblock %}
 
+{% block extra_css %}
+<style>
+    .filter-card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--card-border);
+        margin-bottom: 24px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .filter-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+    }
+
+    .step-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #818cf8;
+        margin-bottom: 5px;
+    }
+
+    .section-divider {
+        font-weight: 600;
+        color: var(--primary);
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+    }
+
+    /* ── Subject Result Card ── */
+    .subject-result-card {
+        background: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0;
+        margin-bottom: 20px;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .subject-result-card-header {
+        background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 100%);
+        padding: 14px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .subject-result-card-header .subject-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .subject-result-card-header .subject-title i {
+        color: #a5b4fc;
+        font-size: 0.95rem;
+    }
+
+    .subject-result-card-header .subject-code-badge {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        color: #e0e7ff;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 3px 12px;
+        border-radius: 20px;
+        letter-spacing: 0.3px;
+    }
+
+    .subject-result-card-body {
+        padding: 20px;
+    }
+
+    .marks-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(155px, 1fr));
+        gap: 14px;
+    }
+
+    .calc-box {
+        background: #eef2ff;
+        border: 1px solid #c7d2fe;
+        border-radius: 8px;
+        padding: 12px 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .calc-box .calc-label {
+        font-size: 0.75rem;
+        color: #4f46e5;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .calc-box .calc-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #312e81;
+    }
+
+    .calc-box.fail-box {
+        background: #fef2f2;
+        border-color: #fca5a5;
+    }
+
+    .calc-box.fail-box .calc-label { color: #dc2626; }
+    .calc-box.fail-box .calc-value { color: #991b1b; }
+
+    .marks-entry-section {
+        display: none;
+    }
+
+    .marks-entry-header {
+        background: var(--card-bg);
+        border-radius: 12px 12px 0 0;
+        border: 1px solid var(--card-border);
+        border-bottom: none;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .marks-entry-header h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+    .marks-entry-header p {
+        font-size: 0.82rem;
+        color: var(--text-light);
+        margin-top: 3px;
+        margin-bottom: 0;
+    }
+
+    .btn-reset {
+        background: #f1f5f9;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+        padding: 7px 14px;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-reset:hover {
+        background: #e2e8f0;
+        color: #334155;
+    }
+
+    .save-row {
+        padding: 16px 24px;
+        background: #f8fafc;
+        border: 1px solid var(--card-border);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 12px;
+    }
+
+    select.result-status-select {
+        width: 100%;
+        padding: 9px 30px 9px 10px;
+        border: 1.5px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-main);
+        background: white;
+        cursor: pointer;
+        font-family: 'Inter', sans-serif;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 8px center;
+        background-size: 15px;
+        transition: border-color 0.2s;
+    }
+
+    select.result-status-select:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    select.result-status-select.pass-select { color: #065f46; border-color: #10b981; background-color: #d1fae5; }
+    select.result-status-select.fail-select { color: #991b1b; border-color: #ef4444; background-color: #fee2e2; }
+    select.result-status-select.backlog-select { color: #92400e; border-color: #f59e0b; background-color: #fef3c7; }
+
+    @media (max-width: 1100px) {
+        .filter-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+        .filter-grid, .filter-grid-2 { grid-template-columns: 1fr; }
+        .marks-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+    .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        width: 90%; max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 24px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    .modal-title { font-size: 1.25rem; font-weight: 700; color: #1e1b4b; }
+    .close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #6b7280; }
+    .preview-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    .preview-table th, .preview-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+    .preview-table th { background: #f8fafc; font-weight: 600; color: #4f46e5; font-size: 0.85rem; text-transform: uppercase; }
+    .preview-table td { font-size: 0.95rem; color: #334155; }
+    .overall-result-box {
+        background: #eef2ff;
+        padding: 16px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border: 1px solid #c7d2fe;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="page-title">
-    <h2>Dynamic Result Entry</h2>
+    <h2><i class="fas fa-edit" style="color: var(--primary); margin-right: 10px;"></i>Dynamic Result Entry</h2>
     <a href="{% url 'core:manage_results' %}" class="btn" style="background: #F3F4F6; color: var(--text-main); border: 1px solid #D1D5DB;">
         <i class="fas fa-arrow-left"></i> Back to Results
     </a>
 </div>
 
-<div class="card" style="max-width: 800px;">
+<p style="color: var(--text-light); margin-top: -18px; margin-bottom: 22px; font-size: 0.9rem;">
+    Select course, semester, subject, and student — then enter the marks in the panel below.
+</p>
+
+<!-- ── Filters Card ── -->
+<div class="filter-card">
+    <div class="section-divider">
+        <i class="fas fa-filter"></i>&nbsp; Filters &amp; Selection
+    </div>
+
     <form method="POST" id="dynamicResultForm">
         {% csrf_token %}
-        <div class="section-title" style="margin-bottom: 20px; font-weight: 600; color: var(--primary); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
-            <i class="fas fa-filter"></i> Filters & Selection
-        </div>
-        
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+
+        <div class="filter-grid">
             <div class="form-group">
+                <div class="step-label">Step 1</div>
                 <label>Course *</label>
-                <select id="course_dropdown" name="course_id" class="form-control" required onchange="fetchSemesters(this.value)">
+                <select id="course_dropdown" name="course_id" class="form-control" required
+                    onchange="document.getElementById('stream_dropdown').value=''; fetchStreamsByCourse(this.value); clearAll(); fetchStudentsWrapper();">
                     <option value="">-- Select Course --</option>
                     {% for course in courses %}
-                    <option value="{{ course.id }}">{{ course.name }}</option>
+                    <option value="{{ course.id }}">{{ course.course_name }}</option>
                     {% endfor %}
                 </select>
             </div>
 
             <div class="form-group">
-                <label>Semester *</label>
-                <select id="semester_dropdown" name="semester_id" class="form-control" required disabled onchange="fetchSubjects(this.value); fetchStudents(document.getElementById('course_dropdown').value, this.value);">
+                <div class="step-label">Step 2</div>
+                <label>Stream *</label>
+                <select id="stream_dropdown" name="stream_id" class="form-control" required disabled
+                    onchange="document.getElementById('semester_dropdown').value=''; fetchSemestersByStream(this.value); clearAll(); fetchStudentsWrapper();">
                     <option value="">-- Select Course First --</option>
                 </select>
             </div>
-            
+
             <div class="form-group">
+                <div class="step-label">Step 3</div>
+                <label>Semester *</label>
+                <select id="semester_dropdown" name="semester_id" class="form-control" required disabled
+                    onchange="fetchSubjects(this.value); fetchStudentsWrapper();">
+                    <option value="">-- Select Stream First --</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-grid">
+            <div class="form-group">
+                <div class="step-label">Step 4</div>
+                <label>Admission Year *</label>
+                <select id="admission_year_dropdown" name="admission_year" class="form-control" required
+                    onchange="fetchStudentsWrapper()">
+                    <option value="">-- Select Year --</option>
+                    {% for year in admission_years %}
+                    <option value="{{ year.id }}">{{ year.year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="step-label">Step 5</div>
+                <label>Student Name *</label>
+                <select id="student_dropdown" name="student_id" class="form-control" required disabled
+                    onchange="loadIfReady()">
+                    <option value="">-- Select Filters First --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <div class="step-label">Step 6</div>
                 <label>Subject *</label>
-                <select id="subject_dropdown" name="subject_id" class="form-control" required disabled>
+                <select id="subject_dropdown" name="subject_dropdown_val" class="form-control" required disabled
+                    onchange="handleSubjectSelect(this.value)">
                     <option value="">-- Select Semester First --</option>
                 </select>
             </div>
-
-            <div class="form-group">
-                <label>Student *</label>
-                <select id="student_dropdown" name="student_id" class="form-control" required disabled>
-                    <option value="">-- Select Course & Semester First --</option>
-                </select>
-            </div>
         </div>
 
-        <div class="section-title" style="margin-bottom: 20px; font-weight: 600; color: var(--primary); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
-            <i class="fas fa-star-half-alt"></i> Marks Entry
+        <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 4px;">
+            <span id="no_subject_msg" style="font-size:0.85rem; color:#f59e0b; display:none;">
+                <i class="fas fa-exclamation-triangle"></i> No subjects found for this semester.
+            </span>
+            <button type="button" id="load_results_btn" class="btn"
+                style="background: var(--primary); color: white; display: none; padding: 10px 20px;"
+                onclick="loadResultsTable()">
+                <i class="fas fa-sync-alt"></i> Reload Existing Marks
+            </button>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;">
-            <h4 style="grid-column: 1 / -1; margin: 0 0 10px 0; color: #334155; font-size: 0.95rem;">Theory Marks</h4>
-            <div class="form-group">
-                <label>Max Marks</label>
-                <input type="number" id="theory_max" name="theory_max" class="form-control" value="80" required onchange="calculateResult()">
-            </div>
-            <div class="form-group">
-                <label>Min Marks</label>
-                <input type="number" id="theory_min" name="theory_min" class="form-control" value="32" required onchange="calculateResult()">
-            </div>
-            <div class="form-group">
-                <label>Obtained *</label>
-                <input type="number" id="theory_marks" name="theory_marks" class="form-control" value="0" required oninput="calculateResult()">
-            </div>
-        </div>
+        <!-- ── Marks Entry Section ── -->
+        <div id="marks_entry_section" class="marks-entry-section" style="margin-top: 20px;">
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; background: #f8fafc; padding: 15px; border-radius: 8px;">
-            <h4 style="grid-column: 1 / -1; margin: 0 0 10px 0; color: #334155; font-size: 0.95rem;">Practical Marks</h4>
-            <div class="form-group">
-                <label>Max Marks</label>
-                <input type="number" id="practical_max" name="practical_max" class="form-control" value="30" required onchange="calculateResult()">
+            <div class="marks-entry-header">
+                <div>
+                    <h3><i class="fas fa-list-alt" style="color: var(--primary); margin-right: 8px;"></i>Marks Entry Panel</h3>
+                    <p>Subject: <strong id="selected_subject_name" style="color: var(--primary);">—</strong></p>
+                </div>
+                <button type="button" class="btn-reset" onclick="clearAll()">
+                    <i class="fas fa-times"></i> Clear
+                </button>
             </div>
-            <div class="form-group">
-                <label>Min Marks</label>
-                <input type="number" id="practical_min" name="practical_min" class="form-control" value="15" required onchange="calculateResult()">
-            </div>
-            <div class="form-group">
-                <label>Obtained *</label>
-                <input type="number" id="practical_marks" name="practical_marks" class="form-control" value="0" required oninput="calculateResult()">
-            </div>
-        </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-            <div class="form-group" style="background: #f8fafc; padding: 15px; border-radius: 8px;">
-                <h4 style="margin: 0 0 10px 0; color: #334155; font-size: 0.95rem;">Internal Marks</h4>
-                <label>Obtained *</label>
-                <input type="number" id="internal_marks" name="internal_marks" class="form-control" value="0" required oninput="calculateResult()">
-            </div>
-            
-            <div class="form-group" style="padding: 15px;">
-                <label>Percentage (%)</label>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                    <input type="text" id="percentage_display" class="form-control" value="0.00" readonly style="background: #e2e8f0; font-weight: 600;">
+            <div style="border: 1px solid var(--card-border); border-top: none; border-bottom: none; padding: 20px; background: white;">
+                <div id="results_form_body">
+                    <!-- Dynamic subject mark fields injected here -->
                 </div>
             </div>
-            
-            <div class="form-group" style="padding: 15px;">
-                <label>Result Status</label>
-                <select id="result_status" name="result_status" class="form-control" style="font-weight: 600;">
-                    <option value="Pass">Pass</option>
-                    <option value="Fail">Fail</option>
-                    <option value="Backlog">Backlog</option>
-                </select>
+
+            <div class="save-row">
+                <span id="overall_status_label" style="font-size: 0.88rem; color: var(--text-light);"></span>
+                <button type="button" id="preview_btn" class="btn"
+                    style="background: #4f46e5; color: white; padding: 11px 28px; font-size: 0.95rem;" onclick="openPreviewModal()">
+                    <i class="fas fa-eye"></i> Preview & Create Result
+                </button>
             </div>
         </div>
 
-        <button type="submit" class="btn" style="width: 100%; justify-content: center; background: #4F46E5; font-size: 1.1rem; padding: 12px;">
-            <i class="fas fa-save"></i> Save Dynamic Result
-        </button>
     </form>
 </div>
 
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="modal-title"><i class="fas fa-search-plus" style="color: var(--primary);"></i> Preview Result</div>
+            <button type="button" class="close-modal" onclick="closePreviewModal()">&times;</button>
+        </div>
+        <table class="preview-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Theory</th>
+                    <th>Practical</th>
+                    <th>Total</th>
+                    <th>%</th>
+                    <th>Grade</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="previewTableBody">
+            </tbody>
+        </table>
+        <div class="overall-result-box">
+            <div>
+                <span style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Overall Total</span><br>
+                <strong style="font-size: 1.25rem; color: #1e1b4b;" id="previewOverallTotal">0/0</strong>
+            </div>
+            <div>
+                <span style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Overall %</span><br>
+                <strong style="font-size: 1.25rem; color: #1e1b4b;" id="previewOverallPct">0%</strong>
+            </div>
+            <div>
+                <span style="font-size: 0.85rem; color: #64748b; text-transform: uppercase; font-weight: 600;">Overall Status</span><br>
+                <span id="previewOverallStatus" style="font-size: 1.1rem; font-weight: 700;">Pass</span>
+            </div>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+            <button type="button" class="btn" style="background: #f1f5f9; color: #475569;" onclick="closePreviewModal()">Edit Marks</button>
+            <button type="button" class="btn" style="background: #10b981; color: white;" onclick="submitFinalResult()">Confirm & Save</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block extra_js %}
 <script>
-    function fetchSemesters(courseId) {
-        const semDropdown = document.getElementById('semester_dropdown');
+    let currentLoadedSubjects = [];
+
+    function fetchStreamsByCourse(courseId) {
+        const streamDropdown = document.getElementById('stream_dropdown');
         if (!courseId) {
-            semDropdown.innerHTML = '<option value="">-- Select Course First --</option>';
-            semDropdown.disabled = true;
+            streamDropdown.innerHTML = '<option value="">-- Select Course First --</option>';
+            streamDropdown.disabled = true;
             return;
         }
-        
-        fetch(`/admin/ajax/get-semesters/?course_id=${courseId}`)
-            .then(response => response.json())
+        streamDropdown.innerHTML = '<option value="">-- Loading... --</option>';
+        fetch(`/admin/ajax/get-streams/?course_id=${courseId}`)
+            .then(r => r.json())
             .then(data => {
-                semDropdown.innerHTML = '<option value="">-- Select Semester --</option>';
-                data.forEach(sem => {
-                    semDropdown.innerHTML += `<option value="${sem.id}">${sem.name}</option>`;
-                });
-                semDropdown.disabled = false;
+                if (data.length > 0) {
+                    streamDropdown.innerHTML = '<option value="">-- Select Stream --</option>';
+                    data.forEach(stream => {
+                        streamDropdown.innerHTML += `<option value="${stream.id}">${stream.name}</option>`;
+                    });
+                    streamDropdown.disabled = false;
+                } else {
+                    streamDropdown.innerHTML = '<option value="">-- No Streams Found --</option>';
+                    streamDropdown.disabled = true;
+                }
             });
+    }
+
+    function fetchSemestersByStream(streamId) {
+        const semesterDropdown = document.getElementById('semester_dropdown');
+        if (!streamId) {
+            semesterDropdown.innerHTML = '<option value="">-- Select Stream First --</option>';
+            semesterDropdown.disabled = true;
+            return;
+        }
+        semesterDropdown.innerHTML = '<option value="">-- Loading... --</option>';
+        fetch(`/admin/ajax/get-semesters/?stream_id=${streamId}`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.length > 0) {
+                    semesterDropdown.innerHTML = '<option value="">-- Select Semester --</option>';
+                    data.forEach(sem => {
+                        semesterDropdown.innerHTML += `<option value="${sem.id}">${sem.name}</option>`;
+                    });
+                    semesterDropdown.disabled = false;
+                } else {
+                    semesterDropdown.innerHTML = '<option value="">-- No Semesters Found --</option>';
+                    semesterDropdown.disabled = true;
+                }
+            });
+    }
+
+    function clearAll() {
+        document.getElementById('marks_entry_section').style.display = 'none';
+        document.getElementById('results_form_body').innerHTML = '';
+        document.getElementById('selected_subject_name').innerText = '—';
+        document.getElementById('overall_status_label').innerText = '';
+        const subjDrop = document.getElementById('subject_dropdown');
+        if (subjDrop) {
+            subjDrop.innerHTML = '<option value="">-- Select Semester First --</option>';
+            subjDrop.disabled = true;
+        }
+        const streamDrop = document.getElementById('stream_dropdown');
+        if (streamDrop && !document.getElementById('course_dropdown').value) {
+            streamDrop.innerHTML = '<option value="">-- Select Course First --</option>';
+            streamDrop.disabled = true;
+        }
+        const semDrop = document.getElementById('semester_dropdown');
+        if (semDrop && !document.getElementById('stream_dropdown').value) {
+            semDrop.innerHTML = '<option value="">-- Select Stream First --</option>';
+            semDrop.disabled = true;
+        }
+        currentLoadedSubjects = [];
+        document.getElementById('no_subject_msg').style.display = 'none';
     }
 
     function fetchSubjects(semesterId) {
-        const subjDropdown = document.getElementById('subject_dropdown');
-        if (!semesterId) {
-            subjDropdown.innerHTML = '<option value="">-- Select Semester First --</option>';
-            subjDropdown.disabled = true;
-            return;
-        }
-        
+        if (!semesterId) { clearAll(); return; }
+        const subjDrop = document.getElementById('subject_dropdown');
+        const noSubjMsg = document.getElementById('no_subject_msg');
+        noSubjMsg.style.display = 'none';
+        subjDrop.innerHTML = '<option value="">-- Loading subjects... --</option>';
+        subjDrop.disabled = true;
+        document.getElementById('marks_entry_section').style.display = 'none';
+
         fetch(`/admin/ajax/get-subjects/?semester_id=${semesterId}`)
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
-                subjDropdown.innerHTML = '<option value="">-- Select Subject --</option>';
-                data.forEach(subj => {
-                    subjDropdown.innerHTML += `<option value="${subj.id}">${subj.name} (${subj.code})</option>`;
-                });
-                subjDropdown.disabled = false;
+                currentLoadedSubjects = data;
+                if (data.length > 0) {
+                    subjDrop.innerHTML = '<option value="">-- Select Subject --</option>';
+                    subjDrop.innerHTML += '<option value="ALL" style="font-weight:bold; color:var(--primary);">✨ -- Select All Subjects -- ✨</option>';
+                    data.forEach(subj => {
+                        const name = subj.subject_name || subj.name;
+                        subjDrop.innerHTML += `<option value="${subj.id}">${name}</option>`;
+                    });
+                    subjDrop.disabled = false;
+                    loadIfReady();
+                } else {
+                    subjDrop.innerHTML = '<option value="">-- No Subjects Found --</option>';
+                    noSubjMsg.style.display = 'inline';
+                }
             });
     }
 
-    function fetchStudents(courseId, semesterId) {
+    function handleSubjectSelect(subjId) {
+        if (!subjId) {
+            document.getElementById('marks_entry_section').style.display = 'none';
+            return;
+        }
+        if (subjId === "ALL") {
+            const allNames = currentLoadedSubjects.map(s => s.subject_name || s.name).join(', ');
+            document.getElementById('selected_subject_name').innerText = allNames;
+            buildResultFormEmpty(currentLoadedSubjects);
+            loadIfReady();
+        } else {
+            const subj = currentLoadedSubjects.find(s => s.id == subjId);
+            if (subj) {
+                const name = subj.subject_name || subj.name;
+                document.getElementById('selected_subject_name').innerText = name;
+                buildResultFormEmpty([subj]);
+                loadIfReady();
+            }
+        }
+    }
+
+    function fetchStudentsWrapper() {
+        const courseId = document.getElementById('course_dropdown').value;
+        const streamId = document.getElementById('stream_dropdown') ? document.getElementById('stream_dropdown').value : '';
+        const semesterId = document.getElementById('semester_dropdown').value;
+        const admissionYear = document.getElementById('admission_year_dropdown').value;
         const studentDropdown = document.getElementById('student_dropdown');
+
         if (!courseId || !semesterId) {
             studentDropdown.innerHTML = '<option value="">-- Select Course & Semester First --</option>';
             studentDropdown.disabled = true;
             return;
         }
-        
-        fetch(`/admin/ajax/get-students/?course_id=${courseId}&semester_id=${semesterId}`)
-            .then(response => response.json())
+
+        studentDropdown.innerHTML = '<option value="">-- Loading students... --</option>';
+        studentDropdown.disabled = true;
+
+        const params = new URLSearchParams();
+        params.append('course_id', courseId);
+        if (streamId) params.append('stream_id', streamId);
+        params.append('semester_id', semesterId);
+        if (admissionYear) params.append('admission_year', admissionYear);
+
+        fetch(`/admin/ajax/get-students/?${params.toString()}`)
+            .then(r => r.json())
             .then(data => {
-                studentDropdown.innerHTML = '<option value="">-- Select Student --</option>';
-                data.forEach(student => {
-                    studentDropdown.innerHTML += `<option value="${student.id}">${student.name}</option>`;
-                });
-                studentDropdown.disabled = false;
+                if (data.length > 0) {
+                    studentDropdown.innerHTML = '<option value="">-- Select Student --</option>';
+                    data.forEach(student => {
+                        studentDropdown.innerHTML += `<option value="${student.id}">${student.name}</option>`;
+                    });
+                    studentDropdown.disabled = false;
+                } else {
+                    studentDropdown.innerHTML = '<option value="">-- No Students Found --</option>';
+                }
             });
     }
 
-    function calculateResult() {
-        const tMax = parseFloat(document.getElementById('theory_max').value) || 0;
-        const tMin = parseFloat(document.getElementById('theory_min').value) || 0;
-        const tObt = parseFloat(document.getElementById('theory_marks').value) || 0;
-        
-        const pMax = parseFloat(document.getElementById('practical_max').value) || 0;
-        const pMin = parseFloat(document.getElementById('practical_min').value) || 0;
-        const pObt = parseFloat(document.getElementById('practical_marks').value) || 0;
-        
-        const iObt = parseFloat(document.getElementById('internal_marks').value) || 0;
-        
-        const totalObt = tObt + pObt + iObt;
-        const totalMax = tMax + pMax + 50; // Approximating internal max as 50
-        
-        let perc = 0;
-        if (totalMax > 0) {
-            perc = (totalObt / totalMax) * 100;
-        }
-        
-        document.getElementById('percentage_display').value = perc.toFixed(2) + '%';
-        
-        const statusDropdown = document.getElementById('result_status');
-        if (tObt < tMin || pObt < pMin) {
-            if (tObt >= tMin && pObt < pMin) {
-                statusDropdown.value = 'Backlog';
-                statusDropdown.style.color = '#ca8a04';
-            } else {
-                statusDropdown.value = 'Fail';
-                statusDropdown.style.color = '#dc2626';
-            }
+    function buildResultFormEmpty(subjects) {
+        document.getElementById('marks_entry_section').style.display = 'block';
+        const body = document.getElementById('results_form_body');
+        body.innerHTML = '';
+
+        subjects.forEach(subj => {
+            const subjId = subj.id;
+            const subjName = subj.subject_name || subj.name;
+            const subjCode = subj.code || subj.subject_code || '';
+            const t_max = subj.t_max || subj.theory_max || 70;
+            const p_max = subj.p_max || subj.practical_max || 30;
+            const t_min = subj.t_min || subj.theory_min || 25;
+            const p_min = subj.p_min || subj.practical_min || 10;
+
+            const formHTML = `
+                <div class="subject-result-card" id="card_${subjId}">
+                    <div class="subject-result-card-header">
+                        <div class="subject-title">
+                            <i class="fas fa-book-open"></i>
+                            ${subjName}
+                        </div>
+                        ${subjCode ? `<span class="subject-code-badge">${subjCode}</span>` : ''}
+                        <input type="hidden" name="subject_id" value="${subjId}">
+                    </div>
+
+                    <div class="subject-result-card-body">
+                        <div class="marks-grid">
+
+                            <!-- Theory -->
+                            <div class="form-group">
+                                <label style="font-size:0.8rem; color:#64748b;">Theory Max Marks</label>
+                                <input type="number" name="theory_max" id="t_max_${subjId}" class="form-control"
+                                       value="${t_max}" onchange="calcRow(${subjId})">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size:0.8rem; color:#64748b;">Theory Min (Pass)</label>
+                                <input type="number" name="theory_min" id="t_min_${subjId}" class="form-control"
+                                       value="${t_min}" onchange="calcRow(${subjId})">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size:0.8rem; color: var(--primary); font-weight:700;">
+                                    Theory Obtained <span style="color:red">*</span>
+                                </label>
+                                <input type="number" name="theory_marks" id="t_obt_${subjId}" class="form-control"
+                                       style="border-color: var(--primary); border-width: 2px;"
+                                       value="0" min="0" max="${t_max}" oninput="calcRow(${subjId})">
+                            </div>
+
+                            <!-- Practical -->
+                            <div class="form-group">
+                                <label style="font-size:0.8rem; color:#64748b;">Practical Max Marks</label>
+                                <input type="number" name="practical_max" id="p_max_${subjId}" class="form-control"
+                                       value="${p_max}" onchange="calcRow(${subjId})">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size:0.8rem; color:#64748b;">Practical Min (Pass)</label>
+                                <input type="number" name="practical_min" id="p_min_${subjId}" class="form-control"
+                                       value="${p_min}" onchange="calcRow(${subjId})">
+                            </div>
+                            <div class="form-group">
+                                <label style="font-size:0.8rem; color: var(--primary); font-weight:700;">
+                                    Practical Obtained <span style="color:red">*</span>
+                                </label>
+                                <input type="number" name="practical_marks" id="p_obt_${subjId}" class="form-control"
+                                       style="border-color: var(--primary); border-width: 2px;"
+                                       value="0" min="0" max="${p_max}" oninput="calcRow(${subjId})">
+                            </div>
+
+                            <!-- Calculated boxes -->
+                            <div class="calc-box" id="calc_box_${subjId}">
+                                <span class="calc-label">Total Marks</span>
+                                <span class="calc-value" id="tot_${subjId}">0</span>
+                            </div>
+                            <div class="calc-box" id="pct_box_${subjId}">
+                                <span class="calc-label">Percentage</span>
+                                <span class="calc-value" id="pct_${subjId}">0%</span>
+                            </div>
+
+                            <!-- Result Status -->
+                            <div class="form-group">
+                                <label style="font-size:0.8rem; color:#64748b;">Result Status</label>
+                                <select name="result_status" id="sta_${subjId}" class="result-status-select pass-select">
+                                    <option value="Pass">✔ Pass</option>
+                                    <option value="Fail">✘ Fail</option>
+                                    <option value="Backlog">⚠ Backlog</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+            body.innerHTML += formHTML;
+            calcRow(subjId);
+        });
+    }
+
+    function loadIfReady() {
+        const studentId = document.getElementById('student_dropdown').value;
+        const subjId = document.getElementById('subject_dropdown').value;
+        if (studentId && subjId) {
+            document.getElementById('load_results_btn').style.display = 'inline-block';
+            loadResultsTable();
         } else {
-            statusDropdown.value = 'Pass';
-            statusDropdown.style.color = '#16a34a';
+            document.getElementById('marks_entry_section').style.display = 'none';
+            document.getElementById('load_results_btn').style.display = 'none';
         }
+    }
+
+    function loadResultsTable() {
+        const studentId = document.getElementById('student_dropdown').value;
+        const subjId = document.getElementById('subject_dropdown').value;
+        if (!studentId || !subjId) return;
+
+        const params = new URLSearchParams();
+        params.append('student_id', studentId);
+        
+        if (subjId === "ALL") {
+            currentLoadedSubjects.forEach(s => params.append('subject_ids[]', s.id));
+        } else {
+            params.append('subject_ids[]', subjId);
+        }
+
+        const btn = document.getElementById('load_results_btn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+
+        fetch(`/admin/ajax/get-student-results/?${params.toString()}`)
+            .then(res => res.json())
+            .then(data => {
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Reload Existing Marks';
+
+                data.forEach(d => {
+                    const sId = d.subject_id;
+                    if (!document.getElementById(`t_obt_${sId}`)) return;
+
+                    document.getElementById(`t_max_${sId}`).value = d.theory_max;
+                    document.getElementById(`t_min_${sId}`).value = d.theory_min;
+                    document.getElementById(`t_obt_${sId}`).value = d.theory_marks;
+                    document.getElementById(`p_max_${sId}`).value = d.practical_max;
+                    document.getElementById(`p_min_${sId}`).value = d.practical_min;
+                    document.getElementById(`p_obt_${sId}`).value = d.practical_marks;
+
+                    const iObtEl = document.getElementById(`i_obt_${sId}`);
+                    if (iObtEl) iObtEl.value = d.internal_marks || 0;
+
+                    const statusSelect = document.getElementById(`sta_${sId}`);
+                    if (d.result_status) statusSelect.value = d.result_status;
+
+                    calcRow(sId);
+                });
+            })
+            .catch(err => {
+                console.error(err);
+                btn.innerHTML = '<i class="fas fa-sync-alt"></i> Reload Existing Marks';
+            });
+    }
+
+    function calcRow(subjId) {
+        const tObt = parseFloat(document.getElementById(`t_obt_${subjId}`).value) || 0;
+        const pObt = parseFloat(document.getElementById(`p_obt_${subjId}`).value) || 0;
+
+        const tMax = parseFloat(document.getElementById(`t_max_${subjId}`).value) || 0;
+        const pMax = parseFloat(document.getElementById(`p_max_${subjId}`).value) || 0;
+        const tMin = parseFloat(document.getElementById(`t_min_${subjId}`).value) || 0;
+        const pMin = parseFloat(document.getElementById(`p_min_${subjId}`).value) || 0;
+
+        const totalObt = tObt + pObt;
+        const totalMax = tMax + pMax;
+
+        document.getElementById(`tot_${subjId}`).innerText = totalObt.toFixed(1);
+
+        let pct = 0;
+        let status = 'Pass';
+        let isFail = false;
+
+        if (tObt < tMin || pObt < pMin) {
+            isFail = true;
+            status = 'Fail';
+        }
+
+        if (totalMax > 0) pct = (totalObt / totalMax) * 100;
+
+        const pctSpan = document.getElementById(`pct_${subjId}`);
+        if (pctSpan) {
+            pctSpan.innerText = pct.toFixed(1) + '%';
+        }
+
+        // Color the calc boxes
+        const calcBox = document.getElementById(`calc_box_${subjId}`);
+        const pctBox = document.getElementById(`pct_box_${subjId}`);
+        if (isFail) {
+            calcBox && calcBox.classList.add('fail-box');
+            pctBox && pctBox.classList.add('fail-box');
+        } else {
+            calcBox && calcBox.classList.remove('fail-box');
+            pctBox && pctBox.classList.remove('fail-box');
+        }
+
+        // Update result select
+        const sel = document.getElementById(`sta_${subjId}`);
+        if (sel) {
+            sel.value = status;
+            sel.className = 'result-status-select ' + status.toLowerCase() + '-select';
+        }
+
+        updateOverallStatus();
+    }
+
+    function updateOverallStatus() {
+        let anyFail = false;
+        const selects = document.querySelectorAll('.result-status-select');
+        selects.forEach(sel => {
+            if (sel.value === 'Fail') anyFail = true;
+        });
+
+        const label = document.getElementById('overall_status_label');
+        if (label) {
+            label.innerHTML = anyFail
+                ? '<i class="fas fa-times-circle" style="color:#ef4444;"></i> <span style="color:#dc2626; font-weight:600;">Will be marked as FAIL</span>'
+                : '<i class="fas fa-check-circle" style="color:#10b981;"></i> <span style="color:#059669; font-weight:600;">Will be marked as PASS</span>';
+        }
+    }
+
+    function getGrade(pct) {
+        if (pct >= 90) return { grade: 'O', color: '#4f46e5' };
+        if (pct >= 80) return { grade: 'A', color: '#10b981' };
+        if (pct >= 70) return { grade: 'B', color: '#3b82f6' };
+        if (pct >= 60) return { grade: 'C', color: '#f59e0b' };
+        if (pct >= 50) return { grade: 'D', color: '#8b5cf6' };
+        return { grade: 'F', color: '#ef4444' };
+    }
+
+    function openPreviewModal() {
+        const tbody = document.getElementById('previewTableBody');
+        tbody.innerHTML = '';
+        
+        let overallObtained = 0;
+        let overallMax = 0;
+        let overallFail = false;
+        
+        // Loop over the cards to extract info
+        const cards = document.querySelectorAll('.subject-result-card');
+        if (cards.length === 0) return;
+        
+        cards.forEach(card => {
+            const subjId = card.id.split('_')[1];
+            const subjName = card.querySelector('.subject-title').innerText;
+            
+            const tObt = parseFloat(document.getElementById(`t_obt_${subjId}`).value) || 0;
+            const tMax = parseFloat(document.getElementById(`t_max_${subjId}`).value) || 0;
+            const pObt = parseFloat(document.getElementById(`p_obt_${subjId}`).value) || 0;
+            const pMax = parseFloat(document.getElementById(`p_max_${subjId}`).value) || 0;
+            
+            const totalObt = tObt + pObt;
+            const totalMax = tMax + pMax;
+            
+            overallObtained += totalObt;
+            overallMax += totalMax;
+            
+            let pct = 0;
+            if (totalMax > 0) pct = (totalObt / totalMax) * 100;
+            
+            const status = document.getElementById(`sta_${subjId}`).value;
+            if (status !== 'Pass') overallFail = true;
+            
+            const gradeInfo = getGrade(pct);
+            
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${subjName}</strong></td>
+                    <td>${tObt}/${tMax}</td>
+                    <td>${pObt}/${pMax}</td>
+                    <td><strong>${totalObt}</strong>/${totalMax}</td>
+                    <td>${pct.toFixed(1)}%</td>
+                    <td style="color: ${gradeInfo.color}; font-weight: bold;">${gradeInfo.grade}</td>
+                    <td>
+                        <span style="color: ${status === 'Pass' ? '#10b981' : (status === 'Fail' ? '#ef4444' : '#f59e0b')}; font-weight: bold;">
+                            ${status}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+        
+        let overallPct = 0;
+        if (overallMax > 0) overallPct = (overallObtained / overallMax) * 100;
+        
+        document.getElementById('previewOverallTotal').innerText = `${overallObtained} / ${overallMax}`;
+        document.getElementById('previewOverallPct').innerText = `${overallPct.toFixed(1)}%`;
+        
+        const statusEl = document.getElementById('previewOverallStatus');
+        if (overallFail) {
+            statusEl.innerText = 'FAIL';
+            statusEl.style.color = '#ef4444';
+        } else {
+            statusEl.innerText = 'PASS';
+            statusEl.style.color = '#10b981';
+        }
+
+        document.getElementById('previewModal').style.display = 'flex';
+    }
+
+    function closePreviewModal() {
+        document.getElementById('previewModal').style.display = 'none';
+    }
+
+    function submitFinalResult() {
+        document.getElementById('dynamicResultForm').submit();
     }
 </script>
 {% endblock %}

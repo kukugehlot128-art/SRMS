@@ -1,0 +1,80 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Attendance Records{% endblock %}
+
+{% block content %}
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="page-title" style="margin-bottom: 0;">
+        <h2>Attendance Records</h2>
+        <p style="color: var(--text-light); margin-top: 5px;">Date-wise summary of marked attendance.</p>
+    </div>
+    <a href="{% url 'core:professor_attendance' %}"
+        style="background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-weight: 500; text-decoration: none;">
+        <i class="fas fa-plus"></i> Mark Attendance
+    </a>
+</div>
+
+{% if records %}
+<div class="card" style="padding: 0; overflow: hidden;">
+    <table class="admin-table" style="width: 100%; text-align: center;">
+        <thead>
+            <tr>
+                <th style="text-align: left;">Date</th>
+                <th style="text-align: left;">Subject</th>
+                <th>Lecture</th>
+                <th>Total Students</th>
+                <th>Present</th>
+                <th>Absent</th>
+                <th>Late</th>
+                <th>Leave</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr>
+                <td style="font-weight: 500; color: var(--text-main); text-align: left;">
+                    <i class="fas fa-calendar-day" style="color: var(--text-light); margin-right: 8px;"></i>
+                    {{ record.date|date:"d M Y" }}
+                </td>
+                <td style="text-align: left;">
+                    <div style="font-weight: 500; color: var(--secondary);">{{ record.subject__subject_name }}</div>
+                </td>
+                <td>
+                    <span style="font-weight: 500;">{{ record.lecture_no }}</span>
+                </td>
+                <td>
+                    <span style="font-weight: 600;">{{ record.total }}</span>
+                </td>
+                <td>
+                    <span style="background: #D1FAE5; color: #059669; padding: 4px 10px; border-radius: 4px; font-weight: 500;">
+                        <i class="fas fa-check-circle" style="margin-right: 3px;"></i> {{ record.total_present }}
+                    </span>
+                </td>
+                <td>
+                    <span style="background: #FEE2E2; color: #DC2626; padding: 4px 10px; border-radius: 4px; font-weight: 500;">
+                        <i class="fas fa-times-circle" style="margin-right: 3px;"></i> {{ record.total_absent }}
+                    </span>
+                </td>
+                <td>
+                    <span style="background: #FEF3C7; color: #D97706; padding: 4px 10px; border-radius: 4px; font-weight: 500;">
+                        <i class="fas fa-clock" style="margin-right: 3px;"></i> {{ record.total_late }}
+                    </span>
+                </td>
+                <td>
+                    <span style="background: #DBEAFE; color: #2563EB; padding: 4px 10px; border-radius: 4px; font-weight: 500;">
+                        <i class="fas fa-envelope-open-text" style="margin-right: 3px;"></i> {{ record.total_leave }}
+                    </span>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="card" style="text-align: center; padding: 40px; color: var(--text-light);">
+    <i class="fas fa-clipboard-list" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.3;"></i><br>
+    <h3 style="color: var(--text-main); margin-bottom: 10px;">No Attendance Records</h3>
+    <p>You haven't marked attendance for any subjects yet.</p>
+</div>
+{% endif %}
+{% endblock %}

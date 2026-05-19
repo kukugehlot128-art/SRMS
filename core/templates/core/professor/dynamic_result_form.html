@@ -1,0 +1,185 @@
+{% extends 'core/professor/base.html' %}
+
+{% block title %}Add Subject Result{% endblock %}
+
+{% block content %}
+<div class="page-title">
+    <h2>Add Subject Result</h2>
+    <p style="color: var(--text-light); margin-top: 5px;">Enter detailed marks for your subjects.</p>
+</div>
+
+<div class="card" style="max-width: 800px;">
+    <form method="POST">
+        {% csrf_token %}
+        <div class="section-title" style="margin-bottom: 20px; font-weight: 600; color: var(--primary); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+            <i class="fas fa-filter"></i> Select Subject & Student
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+            <div class="form-group">
+                <label>Subject *</label>
+                <select id="subject_dropdown" name="subject_id" class="form-control" required onchange="updateStudents()">
+                    <option value="">-- Select Subject --</option>
+                    {% for subject in my_subjects %}
+                    <option value="{{ subject.id }}" data-tmax="{{ subject.theory_max|default:100 }}" data-pmax="{{ subject.practical_max|default:50 }}">
+                        {{ subject.subject_name }} ({{ subject.semester.course.course_name }})
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Student *</label>
+                <select id="student_dropdown" name="student_id" class="form-control" required onchange="checkStudentResult()">
+                    <option value="">-- Select Subject First --</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="marks_entry_section" style="display: none;">
+            <div class="section-title" style="margin-bottom: 20px; font-weight: 600; color: var(--primary); border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">
+                <i class="fas fa-edit"></i> Enter Marks
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div>
+                    <label>Theory Marks</label>
+                    <input type="number" name="theory_marks" id="theory_marks" class="form-control" value="0" required oninput="calcTotal()">
+                    <input type="hidden" name="theory_max" id="theory_max" value="100">
+                    <input type="hidden" name="theory_min" id="theory_min" value="35">
+                    <small id="theory_hint" style="color: var(--text-light); font-size: 0.8rem;"></small>
+                </div>
+                <div>
+                    <label>Practical Marks</label>
+                    <input type="number" name="practical_marks" id="practical_marks" class="form-control" value="0" required oninput="calcTotal()">
+                    <input type="hidden" name="practical_max" id="practical_max" value="50">
+                    <input type="hidden" name="practical_min" id="practical_min" value="15">
+                    <small id="practical_hint" style="color: var(--text-light); font-size: 0.8rem;"></small>
+                </div>
+                <div>
+                    <label>Internal Marks</label>
+                    <input type="number" name="internal_marks" id="internal_marks" class="form-control" value="0" required oninput="calcTotal()">
+                </div>
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #F3F4F6; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <div>
+                    <span style="font-weight: 600; color: var(--text-light);">Total: </span>
+                    <span id="total_marks_display" style="font-weight: bold; font-size: 1.2rem; color: var(--text-main);">0</span>
+                </div>
+                <div>
+                    <label style="margin-right: 10px; font-weight: 600;">Result Status:</label>
+                    <select name="result_status" id="result_status" class="form-control" style="width: auto; display: inline-block;">
+                        <option value="Pass">Pass</option>
+                        <option value="Fail">Fail</option>
+                        <option value="Backlog">Backlog</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn" style="width: 100%; justify-content: center; background: var(--primary); font-size: 1.1rem; padding: 12px;">
+                <i class="fas fa-save"></i> Save Result
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const studentsBySubject = {
+        {% for subject in my_subjects %}
+        "{{ subject.id }}": [
+            {% for student in subject.studentprofile_set.all %}
+            { id: "{{ student.id }}", name: "{{ student.roll_number }} - {{ student.user.get_full_name }}" },
+            {% endfor %}
+        ],
+        {% endfor %}
+    };
+
+    function updateStudents() {
+        const subjectId = document.getElementById('subject_dropdown').value;
+        const studentDropdown = document.getElementById('student_dropdown');
+        const marksSection = document.getElementById('marks_entry_section');
+        
+        marksSection.style.display = 'none';
+        
+        if (!subjectId) {
+            studentDropdown.innerHTML = '<option value="">-- Select Subject First --</option>';
+            studentDropdown.disabled = true;
+            return;
+        }
+        
+        const subjectSelect = document.getElementById('subject_dropdown');
+        const selectedOption = subjectSelect.options[subjectSelect.selectedIndex];
+        const tMax = parseInt(selectedOption.getAttribute('data-tmax') || 100);
+        const pMax = parseInt(selectedOption.getAttribute('data-pmax') || 50);
+        
+        document.getElementById('theory_max').value = tMax;
+        document.getElementById('theory_min').value = Math.ceil(tMax * 0.4);
+        document.getElementById('theory_hint').innerText = `Max: ${tMax}, Min: ${Math.ceil(tMax * 0.4)}`;
+        
+        document.getElementById('practical_max').value = pMax;
+        document.getElementById('practical_min').value = Math.ceil(pMax * 0.4);
+        document.getElementById('practical_hint').innerText = `Max: ${pMax}, Min: ${Math.ceil(pMax * 0.4)}`;
+
+        const students = studentsBySubject[subjectId] || [];
+        studentDropdown.innerHTML = '<option value="">-- Select Student --</option>';
+        students.forEach(student => {
+            studentDropdown.innerHTML += `<option value="${student.id}">${student.name}</option>`;
+        });
+        
+        studentDropdown.disabled = students.length === 0;
+        if (students.length === 0) {
+            studentDropdown.innerHTML = '<option value="">-- No Students Enrolled --</option>';
+        }
+    }
+    
+    function checkStudentResult() {
+        const studentId = document.getElementById('student_dropdown').value;
+        const subjectId = document.getElementById('subject_dropdown').value;
+        
+        if (studentId && subjectId) {
+            document.getElementById('marks_entry_section').style.display = 'block';
+            
+            fetch(`/professor/ajax/get-student-results/?student_id=${studentId}&subject_ids[]=${subjectId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        const d = data[0];
+                        document.getElementById('theory_marks').value = d.theory_marks;
+                        document.getElementById('practical_marks').value = d.practical_marks;
+                        document.getElementById('internal_marks').value = d.internal_marks || 0;
+                        if (d.result_status) {
+                            document.getElementById('result_status').value = d.result_status;
+                        }
+                    } else {
+                        document.getElementById('theory_marks').value = 0;
+                        document.getElementById('practical_marks').value = 0;
+                        document.getElementById('internal_marks').value = 0;
+                        document.getElementById('result_status').value = 'Pass';
+                    }
+                    calcTotal();
+                });
+        } else {
+            document.getElementById('marks_entry_section').style.display = 'none';
+        }
+    }
+    
+    function calcTotal() {
+        const tObt = parseFloat(document.getElementById('theory_marks').value) || 0;
+        const pObt = parseFloat(document.getElementById('practical_marks').value) || 0;
+        const iObt = parseFloat(document.getElementById('internal_marks').value) || 0;
+        
+        const total = tObt + pObt + iObt;
+        document.getElementById('total_marks_display').innerText = total;
+        
+        const tMin = parseFloat(document.getElementById('theory_min').value) || 0;
+        const pMin = parseFloat(document.getElementById('practical_min').value) || 0;
+        
+        let status = 'Pass';
+        if (tObt < tMin || pObt < pMin) {
+            status = 'Fail';
+        }
+        document.getElementById('result_status').value = status;
+    }
+</script>
+{% endblock %}
